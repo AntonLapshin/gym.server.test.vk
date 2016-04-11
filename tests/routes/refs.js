@@ -1,0 +1,1 @@
+var GymDb=require("../../gymdb/gymdb"),Db=require("../../db");module.exports={setUp:function(e){GymDb.init().then(e,console.log)},tearDown:function(e){GymDb.close(),e()},get:function(e){var o=Db.getRefs();e.equal(void 0!=o,!0),e.equal(void 0!=o.muscles,!0),e.equal(o.muscles.length,16),e.done()}};

@@ -1,0 +1,1 @@
+var port=Number(process.env.PORT||8081);require("./server").start(port,{host:"ds019960.mlab.com",port:19960,database:"gymtestvk",username:"gymadmin",password:"24547294"}).then(function(){console.log("Listening port "+port)},function(r){throw r});

@@ -1,0 +1,1 @@
+exports.gyms=[{_id:0,exercises:[0,1,2,3,4],weight:.15,gold:1,real:1},{_id:1,exercises:[0,1,2,3,4,5,6,7,8],weight:.25,gold:15,real:12},{_id:2,exercises:[0,1,2,3,4,5,6,7,8,9,10,11,12],weight:.4,gold:30,real:22}];

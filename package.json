@@ -1,0 +1,36 @@
+{
+  "name": "gym",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "express": "4.13.4",
+    "compression": "1.6.1",
+    "express-session": "1.13.0",
+    "mongodb": "2.1.14",
+    "jquery-deferred": "0.3.0"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "keywords": [
+    "mongodb",
+    "db"
+  ],
+  "author": "Anton Lapshin",
+  "license": "MIT",
+  "bugs": {
+    "url": ""
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-uglify": "^1.5.3",
+    "nodeunit": "0.9.1"
+  }
+}
