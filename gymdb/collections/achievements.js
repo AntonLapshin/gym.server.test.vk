@@ -1,1 +1,0 @@
-exports.achievements=[{_id:0,prize:{type:"gyms",id:0}},{_id:1,prize:{money:3}},{_id:2,prize:{gold:1}},{_id:3,prize:{type:"exercises",id:3}},{_id:4,prize:{money:3}},{_id:5,prize:{money:5}},{_id:6,prize:{type:"exercises",id:4}},{_id:7,prize:{money:5}},{_id:8,prize:{gold:1}},{_id:9,prize:{gold:1}}];
