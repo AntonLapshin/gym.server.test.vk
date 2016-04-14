@@ -1,0 +1,1 @@
+var GymDb=require("./gymdb"),instances=require("./instances");GymDb.create(instances.GYMPRODVK).then(function(){console.log("Database has been created"),GymDb.close()},function(e){console.log(e)});
