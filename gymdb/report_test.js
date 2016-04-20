@@ -1,0 +1,1 @@
+var GymDb=require("./gymdb"),Db=require("../db"),instances=require("./instances"),fs=require("fs"),PlayersCollection=require("./collections/players");GymDb.init(instances.GYMPRODVK).then(function(){var e=PlayersCollection.newPlayer(8710295,4);Db.insert("players",e).then(function(){GymDb.close()})},function(e){console.log(e)});
