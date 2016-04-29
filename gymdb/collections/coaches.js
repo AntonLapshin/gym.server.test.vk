@@ -1,0 +1,1 @@
+exports.newCoach=function(e){return{_id:e,s:0,q:0}};var CollinMartie=exports.newCoach(254444141);exports.coaches=[CollinMartie];
