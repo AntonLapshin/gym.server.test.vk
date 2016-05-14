@@ -1,0 +1,1 @@
+var Curve=require("./curve"),$=require("jquery-deferred");module.exports={getMass:function(e,r){var u=e["public"].level,v=Curve.getMass(u),t=Curve.getMass(u+1),s=Curve.getLevelRequirements(u),a=((e["private"].growth||0)+r)/s;a>1&&(a=1);var i=a*(t-v);return v+i}};
