@@ -1,0 +1,1 @@
+var Db=require("../db"),$=require("jquery-deferred");module.exports={"default":{params:{message:{required:!0}},handler:function(e,r){var s=e.player;s._id;Db.insert("errors",{_id:(new Date).getTime(),side:"client",message:r.message});var a=$.Deferred();return a.resolve({success:!0}),a}}};
