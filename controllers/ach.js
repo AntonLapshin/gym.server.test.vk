@@ -2,7 +2,6 @@ var Db = require('../db');
 var Player = require('./player');
 var Coach = require('./coach');
 var $ = require('jquery-deferred');
-var Achs = require('../gymdb/collections/achievements');
 
 function checkAchGroup(player, ids) {
   var ach = player.private.achievements;
@@ -624,7 +623,7 @@ module.exports = {
 
       if (ach(player, result, req)) {
 
-        var a = $.grep(Achs.achievements, function(a) {
+        var a = $.grep(Db.getRefs().achievements, function(a) {
           return a._id == i;
         })[0];
 
