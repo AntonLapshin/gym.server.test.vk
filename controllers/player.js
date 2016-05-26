@@ -1,1 +1,95 @@
-var Db=require("../db"),PlayersCollection=require("../gymdb/collections/players"),$=require("jquery-deferred"),Rank=require("./rank"),LIMIT_TOP_PLAYERS=20;module.exports={create:function(e){var r=PlayersCollection.newPlayer(e,0);return Db.insert("players",r),r},update:function(e,r){return r.score=PlayersCollection.getScore(r["public"].level,r["private"].achievements.length,r["private"].friends),Db.update("players",e,r)},exists:function(e){return Db.exists("players",e)},find:function(e,r){var n=$.Deferred();return Db.getColl("players").find({_id:e},r).toArray(function(e,r){$.handle(e,r[0],n)}),n},remove:function(e){return Db.remove("players",e)},cat:function(e){var r=Rank.getCatData(e);return $.Deferred(function(e){Db.getColl("players").find({$query:{"public.mass":{$gte:r.min,$lt:r.max}},$orderby:{"public.sum":-1}},{_id:1,"public":1}).limit(LIMIT_TOP_PLAYERS).toArray(function(r,n){$.handle(r,n,e)})})},top:function(){return $.Deferred(function(e){Db.getColl("players").find({$query:{},$orderby:{"public.sum":-1}},{_id:1,"public":1}).limit(LIMIT_TOP_PLAYERS).toArray(function(r,n){$.handle(r,n,e)})})},getPlayers:function(e){return $.Deferred(function(r){Db.getColl("players").find({_id:{$in:e}},{_id:1,"public":1}).limit(LIMIT_TOP_PLAYERS).toArray(function(e,n){$.handle(e,n,r)})})}};
+var Db = require('../db');
+var PlayersCollection = require('../gymdb/collections/players');
+var $ = require('jquery-deferred');
+var Rank = require('./rank');
+
+var LIMIT_TOP_PLAYERS = 20;
+
+module.exports = {
+  create: function(id) {
+    var p = PlayersCollection.newPlayer(id, 0);
+    Db.insert('players', p);
+    return p;
+  },
+  update: function(id, player) {
+    player.score = PlayersCollection.getScore(
+      player.public.level,
+      player.private.achievements.length,
+      player.private.friends
+    );
+    return Db.update('players', id, player);
+  },
+  exists: function(id) {
+    return Db.exists('players', id);
+  },
+  find: function(id, shown) {
+    var defer = $.Deferred();
+    Db.getColl('players').find({
+      _id: id
+    }, shown)
+      .toArray(function(err, data) {
+        $.handle(err, data[0], defer);
+      });
+    return defer;
+    //return Db.find('players', id, shown);
+  },
+  remove: function(id) {
+    return Db.remove('players', id);
+  },
+  cat: function(cat) {
+    var catData = Rank.getCatData(cat);
+    return $.Deferred(function(defer) {
+      Db.getColl('players').find({
+        $query: {
+          "public.mass": {
+            "$gte": catData.min,
+            "$lt": catData.max
+          }
+        },
+        $orderby: {
+          'public.sum': -1
+        }
+      }, {
+        _id: 1,
+        public: 1
+      })
+        .limit(LIMIT_TOP_PLAYERS)
+        .toArray(function(err, data) {
+          $.handle(err, data, defer);
+        });
+    });
+  },
+  top: function() {
+    return $.Deferred(function(defer) {
+      Db.getColl('players').find({
+        $query: {},
+        $orderby: {
+          'public.sum': -1
+        }
+      }, {
+        _id: 1,
+        public: 1
+      })
+        .limit(LIMIT_TOP_PLAYERS)
+        .toArray(function(err, data) {
+          $.handle(err, data, defer);
+        });
+    });
+  },
+  getPlayers: function(ids) {
+    return $.Deferred(function(defer) {
+      Db.getColl('players').find({
+        _id: {
+          $in: ids
+        }
+      }, {
+        _id: 1,
+        public: 1
+      })
+        .limit(LIMIT_TOP_PLAYERS)
+        .toArray(function(err, data) {
+          $.handle(err, data, defer);
+        });
+    });
+  }
+};

@@ -1,1 +1,40 @@
-var Player=require("../controllers/player"),$=require("jquery-deferred");module.exports={"default":{handler:function(e){var r=$.Deferred();return Player.top().then(function(e){r.resolve({success:!0,players:e})}),r}},cat:{params:{cat:{required:!0,parseMethod:parseInt}},handler:function(e,r){var a=$.Deferred();return Player.cat(r.cat).then(function(e){a.resolve({success:!0,players:e})}),a}}};
+var Player = require('../controllers/player'),
+  $ = require('jquery-deferred');
+
+module.exports = {
+  default: {
+    handler: function(session) {
+      var defer = $.Deferred();
+
+      Player.top().then(function(players) {
+        defer.resolve({
+          success: true,
+          players: players
+        });
+      });
+
+      return defer;
+    }
+  },
+
+  cat: {
+    params: {
+      cat: {
+        required: true,
+        parseMethod: parseInt
+      }
+    },
+    handler: function(session, params) {
+      var defer = $.Deferred();
+
+      Player.cat(params.cat).then(function(players) {
+        defer.resolve({
+          success: true,
+          players: players
+        });
+      });
+
+      return defer;
+    }
+  },
+};

@@ -1,1 +1,173 @@
-var Db=require("../../db"),Player=require("../../controllers/player"),GymDb=require("../../gymdb/gymdb"),PlayersCollection=require("../../gymdb/collections/players"),Workout=require("../../routes/workout"),PLAYER_ID_TEST=0,GYM=0,EXERCISE=0,session={auth:{id:PLAYER_ID_TEST}},params={gymId:GYM,exerciseId:EXERCISE,weight:90,repeats:0};module.exports={setUp:function(e){GymDb.create().then(function(){GymDb.init().then(e,console.log)},console.log)},tearDown:function(e){GymDb.close().then(function(){e()})},getExercisePower:function(e){var a=Db.getRefs().exercises[2];Player.find(session.auth.id,["private","public"]).then(function(r){var t=Workout.getExercisePower(r["private"].body,r["public"],a);e.equal(t,334),e.done()})},executeSuccessForce:function(e){Workout.execute.handler(session,params).then(function(a){return e.equal(a.repeats,34.39),e.equal(a.repeatsMax,34.39),e.equal(a.energy,5),e.equal(a.records.length,2),Workout.execute.handler(session,params)}).then(function(a){return e.equal(a.repeats,34.02),e.equal(a.repeatsMax,34.02),e.equal(a.energy,5),e.equal(a.records.length,0),Workout.execute.handler(session,params)}).then(function(a){e.equal(a.repeats,33.63),e.equal(a.repeatsMax,33.63),e.equal(a.energy,5),e.done()})},executeSuccess:function(e){params.weight=35,params.repeats=12,Workout.execute.handler(session,params).then(function(a){e.equal(a.repeats,12),e.equal(a.repeatsMax,54.48),e.equal(a.energy,2),e.done()})},executeWarmup:function(e){params.weight=100,params.repeats=1,Workout.execute.handler(session,params).then(function(a){e.equal(a.repeats,1),e.equal(a.repeatsMax,31.16),e.equal(a.energy,1),e.done()})},executeFailWeight:function(e){params.weight=10,params.repeats=12,Workout.execute.handler(session,params).then(function(a){return e.equal(a,Workout.MES_WEIGHT),params.weight=100,params.repeats=12,Workout.execute.handler(session,params)}).then(function(a){return e.notEqual(a,Workout.MES_WEIGHT),params.weight=33.231,params.repeats=12,Workout.execute.handler(session,params)}).then(function(a){e.equal(a,Workout.MES_WEIGHT),e.done()})},executeFailRepeats:function(e){params.weight=50,params.repeats=500,Workout.execute.handler(session,params).then(function(a){return e.equal(a,Workout.MES_REPEATS_MAX),params.weight=50,params.repeats=-1,Workout.execute.handler(session,params)}).then(function(a){e.equal(a,Workout.MES_REPEATS_MIN),e.done()})},executeFailLessOneRepeat:function(e){params.weight=240,params.repeats=1,Workout.execute.handler(session,params).then(function(a){e.equal(0<a.repeatsMax&&a.repeatsMax<1,!0),e.equal(0<a.repeats&&a.repeats<1,!0),e.equal(a.energy,Db.getRefs().exercises[0].energy),e.done()})},executeFailEnergy:function(e){Player.update(PLAYER_ID_TEST,{$set:{"private.energy":Db.getRefs().exercises[EXERCISE].energy-1}}).then(function(){return params.weight=50,params.repeats=0,Workout.execute.handler(session,params)}).then(function(a){return e.equal(a,Workout.MES_ENERGY),Player.update(PLAYER_ID_TEST,{$set:{"private.energy":1}})}).then(function(){return params.weight=160,params.repeats=10,Workout.execute.handler(session,params)}).then(function(a){e.equal(a,Workout.MES_ENERGY),e.done()})}};
+var Db = require('../../db'),
+    Player = require('../../controllers/player'),
+    GymDb = require('../../gymdb/gymdb'),
+    PlayersCollection = require('../../gymdb/collections/players'),
+    Workout = require('../../routes/workout');
+
+var PLAYER_ID_TEST = 0;
+var GYM = 0;
+var EXERCISE = 0;
+var session = { auth: { id: PLAYER_ID_TEST } };
+var params = {
+    gymId: GYM,
+    exerciseId: EXERCISE,
+    weight: 90,
+    repeats: 0
+};
+
+module.exports = {
+    setUp: function (callback) {
+        GymDb.create().then(function () {
+            GymDb.init().then(callback, console.log);
+        }, console.log);
+    },
+    tearDown: function (callback) {
+        GymDb.close().then(function(){
+            callback();
+        });
+    },
+    getExercisePower: function (test) {
+        var exRef = Db.getRefs().exercises[2];
+        var body = null;
+
+        Player.find(session.auth.id, ['private', 'public']).then(
+            function (player) {
+                var totalPower = Workout.getExercisePower(player.private.body, player.public, exRef);
+                test.equal(totalPower, 334);
+                test.done();
+            }
+        );
+    },
+    executeSuccessForce: function (test) {
+        Workout.execute.handler(session, params).then(
+            function (answer) {
+                test.equal(answer.repeats, 34.39);
+                test.equal(answer.repeatsMax, 34.39);
+                test.equal(answer.energy, 5);
+                test.equal(answer.records.length, 2);
+
+                return Workout.execute.handler(session, params);
+            }
+        ).then(
+            function (answer) {
+                test.equal(answer.repeats, 34.02);
+                test.equal(answer.repeatsMax, 34.02);
+                test.equal(answer.energy, 5);
+                test.equal(answer.records.length, 0);
+
+                return Workout.execute.handler(session, params);
+            }
+        ).then(
+            function (answer) {
+                test.equal(answer.repeats, 33.63);
+                test.equal(answer.repeatsMax, 33.63);
+                test.equal(answer.energy, 5);
+
+                test.done();
+            }
+        );
+    },
+    executeSuccess: function (test) {
+        params.weight = 35;
+        params.repeats = 12;
+        Workout.execute.handler(session, params).then(
+            function (answer) {
+                test.equal(answer.repeats, 12);
+                test.equal(answer.repeatsMax, 54.48);
+                test.equal(answer.energy, 2);
+
+                test.done();
+            }
+        );
+    },
+    executeWarmup: function (test) {
+        params.weight = 100;
+        params.repeats = 1;
+        Workout.execute.handler(session, params).then(
+            function (answer) {
+                test.equal(answer.repeats, 1);
+                test.equal(answer.repeatsMax, 31.16);
+                test.equal(answer.energy, 1);
+
+                test.done();
+            }
+        );
+    },
+    executeFailWeight: function (test) {
+        params.weight = 10;
+        params.repeats = 12;
+        Workout.execute.handler(session, params).then(
+            function (answer) {
+                test.equal(answer, Workout.MES_WEIGHT);
+                params.weight = 100;
+                params.repeats = 12;
+                return Workout.execute.handler(session, params);
+            }
+        ).then(
+            function (answer) {
+                test.notEqual(answer, Workout.MES_WEIGHT);
+                params.weight = 33.231;
+                params.repeats = 12;
+                return Workout.execute.handler(session, params);
+            }
+        ).then(
+            function (answer) {
+                test.equal(answer, Workout.MES_WEIGHT);
+                test.done();
+            });
+    },
+    executeFailRepeats: function (test) {
+        params.weight = 50;
+        params.repeats = 500;
+        Workout.execute.handler(session, params).then(
+            function (answer) {
+                test.equal(answer, Workout.MES_REPEATS_MAX);
+                params.weight = 50;
+                params.repeats = -1;
+                return Workout.execute.handler(session, params);
+            }
+        ).then(
+            function (answer) {
+                test.equal(answer, Workout.MES_REPEATS_MIN);
+                test.done();
+            }
+        );
+    },
+    executeFailLessOneRepeat: function (test) {
+        params.weight = 240;
+        params.repeats = 1;
+        Workout.execute.handler(session, params).then(
+            function (answer) {
+                test.equal(0 < answer.repeatsMax && answer.repeatsMax < 1, true);
+                test.equal(0 < answer.repeats && answer.repeats < 1, true);
+                test.equal(answer.energy, Db.getRefs().exercises[0].energy);
+                test.done();
+            }
+        );
+    },
+    executeFailEnergy: function (test) {
+        Player.update(PLAYER_ID_TEST, {$set: {'private.energy': Db.getRefs().exercises[EXERCISE].energy - 1}}).then(
+            function () {
+                params.weight = 50;
+                params.repeats = 0;
+                return Workout.execute.handler(session, params);
+            }
+        ).then(
+            function (answer) {
+                test.equal(answer, Workout.MES_ENERGY);
+                return Player.update(PLAYER_ID_TEST, {$set: {'private.energy': 1}});
+            }
+        ).then(
+            function () {
+                params.weight = 160;
+                params.repeats = 10;
+                return Workout.execute.handler(session, params);
+            }
+        ).then(
+            function (answer) {
+                test.equal(answer, Workout.MES_ENERGY);
+                test.done();
+            }
+        );
+    }
+};

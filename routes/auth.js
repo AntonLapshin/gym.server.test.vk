@@ -1,1 +1,65 @@
-var Player=require("../controllers/player"),Coach=require("../controllers/coach"),$=require("jquery-deferred");module.exports={"default":{params:{playerId:{parseMethod:parseInt,required:!0},authKey:{required:!0}},handler:function(e,r){var a=$.Deferred(),l=r.playerId;if(5653333!==l){var t=GLOBAL.GYM.VK_APP_ID+"_"+l+"_"+GLOBAL.GYM.VK_APP_SECRET,c=require("crypto"),u=c.createHash("md5").update(t).digest("hex");if(r.authKey!=u)return a.reject("ERR_AUTH_FAIL"),a}return Player.find(r.playerId,{_id:1,"public":1,"private":1}).then(function(l){var t="MES_SUCCESS";l?l["public"].coach?Coach.get(l._id).then(function(r){l["public"].coach=r,e.player=l,a.resolve(t)}):(e.player=l,a.resolve(t)):(l=Player.create(r.playerId),t={signup:!0},e.player=l,a.resolve(t))},a.reject),a}}};
+var Player = require('../controllers/player');
+var Coach = require('../controllers/coach');
+var $ = require('jquery-deferred');
+
+module.exports = {
+
+  default: {
+    params: {
+      playerId: {
+        parseMethod: parseInt,
+        required: true
+      },
+      authKey: {
+        required: true
+      }
+    },
+    handler: function(session, params) {
+      var defer = $.Deferred();
+
+      var playerId = params.playerId;
+
+      if (playerId !== 5653333) {
+        var data = GLOBAL.GYM.VK_APP_ID + '_' + playerId + '_' + GLOBAL.GYM.VK_APP_SECRET;
+        var crypto = require('crypto');
+        var expectedAuthKey = crypto.createHash('md5').update(data).digest('hex');
+
+        if (params.authKey != expectedAuthKey) {
+          defer.reject('ERR_AUTH_FAIL');
+          return defer;
+        }
+      }
+
+      Player.find(params.playerId, {
+        '_id': 1,
+        'public': 1,
+        'private': 1
+      }).then(
+        function(player) {
+          var result = 'MES_SUCCESS';
+
+          if (!player) {
+            player = Player.create(params.playerId);
+            result = {
+              signup: true
+            }
+            session.player = player;
+            defer.resolve(result);
+          } else if (player.public.coach) {
+            Coach.get(player._id).then(function(coach) {
+              player.public.coach = coach;
+              session.player = player;
+              defer.resolve(result);
+            });
+          } else {
+            session.player = player;
+            defer.resolve(result);
+          }
+        },
+        defer.reject
+      );
+
+      return defer;
+    }
+  }
+};

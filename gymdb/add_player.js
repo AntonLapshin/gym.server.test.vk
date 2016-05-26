@@ -1,1 +1,17 @@
-var GymDb=require("./gymdb"),Db=require("../db"),instances=require("./instances"),fs=require("fs"),PlayersCollection=require("./collections/players");GymDb.init(instances.GYMPRODVK).then(function(){var e=PlayersCollection.newPlayer(5653333,4);Db.insert("players",e).then(function(){GymDb.close()})},function(e){console.log(e)});
+var GymDb = require('./gymdb');
+var Db = require('../db');
+var instances = require('./instances');
+var fs = require('fs');
+var PlayersCollection = require('./collections/players');
+
+GymDb.init(instances.GYMPRODVK).then(
+    function () {
+        var p = PlayersCollection.newPlayer(5653333, 4);
+        Db.insert('players', p).then(function(){
+        	GymDb.close();
+        });    	
+    },
+    function (err) {
+        console.log(err);
+    });
+

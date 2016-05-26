@@ -1,1 +1,149 @@
-function reloadSession(e){var r=$.Deferred();return e.sessionStore.sessions[e.sessionID]?(e.session.reload(function(){r.resolve()}),r):(r.resolve(),r)}function handler(e,r,s){function n(s){var n=s.message||s,t={error:n,url:e.url};s.stack&&Db.insert("errors",{_id:(new Date).getTime(),playerId:e.session.player._id,side:"server",message:n,stack:s.stack}),r.jsonp(JSON.stringify(t))}function t(s){var n={data:s||!0,url:e.url};r.jsonp(JSON.stringify(n))}reloadSession(e).then(function(){try{var r=require("./routes/auth"),i=e.session;if(s!==r&&!i.player)throw"ERR_UNAUTH";var o=getMethodName(e,s),a=s[o];if(!a)return void n("Method "+o+" is not exists");var u=getParams(e,a);a.handler(i,u).then(function(r){require("./controllers/ach").handler(i,r,e),i.isDirty?(i.isDirty=!1,i.save(function(){t(r)}),Player.update(i.player._id,i.player)):t(r)},n)}catch(c){n(c)}})}function getMethodName(e,r){for(var s in e.query)if("method"===s)return e.query[s];return"default"}function getParams(e,r){var s={};if(!r.params)return s;for(var n in r.params){var t=r.params[n],i=e.query[n];if(t.required&&void 0===i)throw ERR_PARAMS;t.parseMethod&&(i=t.parseMethod(i)),s[n]=i}return s}var Express=require("express"),Db=require("./db"),Compression=require("compression"),Session=require("express-session"),GymDb=require("./gymdb/gymdb"),$=require("jquery-deferred"),Player=require("./controllers/player");exports.start=function(e){var r=Express();r.use(Compression()),r.use(Session({genid:function(e){var r=e.query.playerId;return r},secret:"iuBviX21"}));var s=["auth","refs","workout","job","self","top","coach","buy","real","god","payment","inv","error"];return $.Deferred(function(n){try{GymDb.init(GLOBAL.GYM.instance).then(function(){s.forEach(function(e){var s=require("./routes/"+e);r.get("/"+e,function(e,r){handler(e,r,s)})}),r.listen(e),n.resolve()},n.reject)}catch(t){n.reject(t)}})};
+var Express = require('express');
+var Db = require('./db');
+var Compression = require('compression');
+var Session = require('express-session');
+var GymDb = require('./gymdb/gymdb');
+var $ = require('jquery-deferred');
+var Player = require('./controllers/player');
+
+function reloadSession(req) {
+  var defer = $.Deferred();
+
+  if (!req.sessionStore.sessions[req.sessionID]) {
+    defer.resolve();
+    return defer;
+  }
+
+  req.session.reload(function() {
+    defer.resolve();
+  });
+
+  return defer;
+}
+
+function handler(req, res, route) {
+
+  function rejectHandler(err) {
+    var message = err.message || err;
+    var answer = {
+      error: message,
+      url: req.url
+    };
+    if (err.stack) {
+      Db.insert('errors', {
+        _id: (new Date()).getTime(),
+        playerId: req.session.player._id,
+        side: 'server',
+        message: message,
+        stack: err.stack
+      });
+    }
+    res.jsonp(JSON.stringify(answer));
+  }
+
+  function resolveHandler(result) {
+    var answer = {
+      data: result || true,
+      url: req.url
+    };
+    res.jsonp(JSON.stringify(answer));
+  }
+
+  reloadSession(req).then(function() {
+
+    try {
+      var auth = require('./routes/auth');
+      var session = req.session;
+      if (route !== auth) {
+        if (!session.player)
+          throw 'ERR_UNAUTH';
+      }
+      var methodName = getMethodName(req, route);
+      var method = route[methodName];
+      if (!method) {
+        rejectHandler("Method " + methodName + " is not exists");
+        return;
+      }
+
+      var params = getParams(req, method);
+      method.handler(session, params)
+        .then(function(result) {
+          require('./controllers/ach').handler(session, result, req);
+          if (session.isDirty) {
+            session.isDirty = false;
+
+            session.save(function() {
+              resolveHandler(result);
+            });
+
+            Player.update(session.player._id, session.player);
+          } else
+            resolveHandler(result);
+        }, rejectHandler);
+    } catch (err) {
+      rejectHandler(err);
+    }
+
+  });
+}
+
+function getMethodName(req, route) {
+  for (var name in req.query) {
+    if (name === 'method')
+      return req.query[name];
+  }
+  return 'default';
+}
+
+function getParams(req, method) {
+  var params = {};
+  if (!method.params)
+    return params;
+
+  for (var name in method.params) {
+    var meta = method.params[name];
+    var value = req.query[name];
+    if (meta.required && value === undefined)
+      throw ERR_PARAMS;
+
+    if (meta.parseMethod)
+      value = meta.parseMethod(value);
+
+    params[name] = value;
+  }
+
+  return params;
+}
+
+exports.start = function(port) {
+  var app = Express();
+  app.use(Compression());
+  app.use(Session({
+    genid: function(req) {
+      var id = req.query.playerId;
+      return id;
+    },
+    secret: 'iuBviX21'
+  }));
+
+  var routes = ['auth', 'refs', 'workout', 'job', 'self', 'top', 'coach', 'buy', 'real', 'god', 'payment', 'inv', 'error'];
+
+  return $.Deferred(function(defer) {
+    try {
+      GymDb.init(GLOBAL.GYM.instance).then(function() {
+
+        routes.forEach(function(routeName) {
+          var route = require('./routes/' + routeName);
+          app.get('/' + routeName, function(req, res) {
+            handler(req, res, route);
+          });
+        });
+
+        app.listen(port);
+        defer.resolve();
+      }, defer.reject);
+    } catch (e) {
+      defer.reject(e);
+    }
+  });
+};

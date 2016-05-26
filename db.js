@@ -1,1 +1,260 @@
-function auth(e){return $.Deferred(function(n){_db.authenticate(e.username,e.password,function(e,t){$.handle(e,t,n)})})}function loadReference(e){return getAllValues(e).then(function(n){_references[e]=n})}function loadReferences(e){var n=[];return e.forEach(function(e){n.push(loadReference(e))}),$.when.apply($,n)}function getCollection(e){return $.Deferred(function(n){_db.collection(e,function(t,o){t?n.reject(t):(_collections[e]=o,n.resolve(o))})})}function getAllValues(e){return"string"==typeof e&&(e=_collections[e]),$.Deferred(function(n){e.find({$query:{},$orderby:{_id:1}}).toArray(function(e,t){$.handle(e,t,n)})})}function clearCollection(e){return"string"==typeof e&&(e=_collections[e]),$.Deferred(function(n){return void 0===e?void n.resolve():void e.remove(function(e,t){$.handle(e,t,n)})})}var Mongo=require("mongodb"),$=require("jquery-deferred"),_db=null,_collections={},_references={};$.handle=function(e,n,t){e?t.reject(e):t.resolve(n)},$.grep=function(e,n){var t=[];return e.forEach(function(e){n(e)&&t.push(e)}),t},$.round=function(e){return Math.round(1e5*e)/1e5},$.random=function(e,n){return Math.random()*(n-e)+e|0},$.sum=function(e){var n=0;return e.forEach(function(e){n+=e}),n},module.exports={init:function(e,n,t){return this.connect(e).then(function(){return module.exports.getCollections(n)}).then(function(){return loadReferences(t)})},connect:function(e){var n=new Mongo.Db(e.database,new Mongo.Server(e.host,e.port,{auto_reconnect:!0},{}));return $.Deferred(function(t){n.open(function(n,o){n?t.reject(n):(_db=o,auth(e).then(function(){t.resolve()},t.reject))})})},clearCollections:function(e){var n=[];return e.forEach(function(e){n.push(clearCollection(e))}),$.when.apply($,n)},clearCollection:clearCollection,getCollections:function(e){var n=[];return e.forEach(function(e){n.push(getCollection(e))}),$.when.apply($,n)},insert:function(e,n){return"string"==typeof e&&(e=_collections[e]),$.Deferred(function(t){return void 0===n||null===n||0===n.length?void t.resolve():void e.insert(n,function(e){$.handle(e,n,t)})})},update:function(e,n,t){return"string"==typeof e&&(e=_collections[e]),$.Deferred(function(o){e.update({_id:n},t,function(e,n){$.handle(e,n,o)})})},remove:function(e,n){return"string"==typeof e&&(e=_collections[e]),$.Deferred(function(t){e.remove({_id:n},function(e,n){$.handle(e,n,t)})})},exists:function(e,n){return"string"==typeof e&&(e=_collections[e]),$.Deferred(function(t){e.findOne({_id:n},{_id:1},function(e,n){$.handle(e,n,t)})})},find:function(e,n,t){"string"==typeof e&&(e=_collections[e]);var o=t;"string"==typeof t&&(t=[t]);for(var r={},c=0;c<t.length;c++)r[t[c]]=1;return $.Deferred(function(t){e.findOne({_id:n},r,function(e,n){e?t.reject(e):null==n?t.resolve(null):"string"==typeof o?t.resolve(n[o]):t.resolve(n)})})},ensureIndex:function(e,n){return"string"==typeof e&&(e=_collections[e]),$.Deferred(function(t){return void 0==n?void t.resolve():void e.ensureIndex(n,function(e,n){$.handle(e,n,t)})})},getRefs:function(){return _references},getDb:function(){return _db},getColl:function(e){return _collections[e]}};
+var Mongo = require('mongodb'),
+  $ = require('jquery-deferred');
+
+var _db = null,
+  _collections = {},
+  _references = {};
+
+$.handle = function(err, data, defer) {
+  if (err)
+    defer.reject(err);
+  else {
+    defer.resolve(data);
+  }
+};
+
+$.grep = function(array, callback) {
+  var res = [];
+  array.forEach(function(item) {
+    if (callback(item))
+      res.push(item);
+  });
+  return res;
+};
+
+$.round = function(v) {
+  return Math.round(v * 100000) / 100000;
+};
+
+$.random = function(min, max) {
+  return (Math.random() * (max - min) + min) | 0;
+};
+
+$.sum = function(arr) {
+  var s = 0;
+  arr.forEach(function(v) {
+    s += v;
+  });
+  return s;
+};
+
+module.exports = {
+  init: function(options, collNames, refNames) {
+    return this.connect(options)
+      .then(function() {
+        return module.exports.getCollections(collNames);
+      })
+      .then(function() {
+        return loadReferences(refNames)
+      })
+  },
+  connect: function(options) {
+    var dbInstance = new Mongo.Db(
+      options.database,
+      new Mongo.Server(
+        options.host,
+        options.port, {
+          auto_reconnect: true
+        }, {}
+      )
+    );
+
+    return $.Deferred(function(defer) {
+      dbInstance.open(function(err, db) {
+        if (err)
+          defer.reject(err);
+        else {
+          _db = db;
+          auth(options).then(function() {
+            defer.resolve();
+          }, defer.reject);
+        }
+      });
+    });
+  },
+  clearCollections: function(names) {
+    var defers = [];
+    names.forEach(function(name) {
+      defers.push(clearCollection(name));
+    });
+
+    return $.when.apply($, defers);
+  },
+  clearCollection: clearCollection,
+  getCollections: function(names) {
+    var defers = [];
+    names.forEach(function(name) {
+      defers.push(getCollection(name));
+    });
+
+    return $.when.apply($, defers);
+  },
+  insert: function(coll, value) {
+    if (typeof coll === 'string')
+      coll = _collections[coll];
+
+    return $.Deferred(function(defer) {
+      if (value === undefined || value === null || value.length === 0) {
+        defer.resolve();
+        return;
+      }
+      coll.insert(value, function(err) {
+        $.handle(err, value, defer);
+      });
+    });
+  },
+  update: function(coll, id, updateClause) {
+    if (typeof coll === 'string')
+      coll = _collections[coll];
+
+    return $.Deferred(function(defer) {
+      coll.update({
+        _id: id
+      }, updateClause, function(err, value) {
+        $.handle(err, value, defer);
+      });
+    });
+  },
+  remove: function(coll, id) {
+    if (typeof coll === 'string')
+      coll = _collections[coll];
+
+    return $.Deferred(function(defer) {
+      coll.remove({
+        _id: id
+      }, function(err, data) {
+        $.handle(err, data, defer);
+      });
+    });
+  },
+  exists: function(coll, id) {
+    if (typeof coll === 'string')
+      coll = _collections[coll];
+
+    return $.Deferred(function(defer) {
+      coll.findOne({
+        _id: id
+      }, {
+        _id: 1
+      }, function(err, data) {
+        $.handle(err, data, defer);
+      });
+    });
+  },
+  find: function(coll, id, shown) {
+    if (typeof coll === 'string')
+      coll = _collections[coll];
+
+    var shownBase = shown;
+    if (typeof shown === 'string') shown = [shown];
+    var target = {};
+    for (var i = 0; i < shown.length; i++) target[shown[i]] = 1;
+
+    return $.Deferred(function(defer) {
+      coll.findOne({
+        _id: id
+      }, target, function(err, data) {
+        if (err)
+          defer.reject(err);
+        else {
+          if (data == null) defer.resolve(null);
+          else if (typeof shownBase === 'string')
+            defer.resolve(data[shownBase]);
+          else
+            defer.resolve(data);
+        }
+      });
+    });
+  },
+  ensureIndex: function(coll, index) {
+    if (typeof coll === 'string')
+      coll = _collections[coll];
+
+    return $.Deferred(function(defer) {
+      if (index == undefined) {
+        defer.resolve();
+        return;
+      }
+
+      coll.ensureIndex(index, function(err, data) {
+        $.handle(err, data, defer);
+      });
+    });
+  },
+  getRefs: function() {
+    return _references;
+  },
+  getDb: function() {
+    return _db;
+  },
+  getColl: function(name) {
+    return _collections[name];
+  }
+};
+
+function auth(options) {
+  return $.Deferred(function(defer) {
+    _db.authenticate(options.username, options.password, function(err, data) {
+      $.handle(err, data, defer);
+    });
+  });
+}
+
+function loadReference(name) {
+  return getAllValues(name).then(function(result) {
+    _references[name] = result;
+  });
+}
+
+function loadReferences(names) {
+  var defers = [];
+  names.forEach(function(name) {
+    defers.push(loadReference(name));
+  });
+
+  return $.when.apply($, defers);
+}
+
+function getCollection(name) {
+  return $.Deferred(function(defer) {
+    _db.collection(name, function(err, value) {
+      if (err)
+        defer.reject(err);
+      else {
+        _collections[name] = value;
+        defer.resolve(value);
+      }
+    });
+  });
+}
+
+function getAllValues(coll) {
+  if (typeof coll === 'string')
+    coll = _collections[coll];
+
+  return $.Deferred(function(defer) {
+    coll.find({
+      $query: {},
+      $orderby: {
+        _id: 1
+      }
+    }).toArray(function(err, data) {
+      $.handle(err, data, defer);
+    });
+  });
+}
+
+function clearCollection(coll) {
+  if (typeof coll === 'string')
+    coll = _collections[coll];
+
+  return $.Deferred(function(defer) {
+    if (coll === undefined) {
+      defer.resolve();
+      return;
+    }
+    coll.remove(function(err, data) {
+      $.handle(err, data, defer);
+    });
+  });
+}

@@ -1,1 +1,3 @@
-exports.errors=[{_id:0}];
+exports.errors = [{
+  _id: 0
+}];

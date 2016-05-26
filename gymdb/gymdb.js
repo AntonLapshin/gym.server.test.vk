@@ -1,1 +1,56 @@
-function createColl(e){var n=require("./collections/"+e)[e];return Db.insert(e,n).then(function(){return Db.ensureIndex(e,INDEX[e])})}function createCollections(){var e=[];return COLL_NAMES.forEach(function(n){e.push(createColl(n))}),$.when.apply($,e)}var Db=require("../db"),$=require("jquery-deferred"),COLL_NAMES=["exercises","gyms","muscles","players","achievements","shop","coaches","errors"],REF_NAMES=["exercises","gyms","muscles","achievements","shop"],INDEX={players:{score:-1},coaches:{q:-1}};module.exports={init:function(e){return Db.init(e,COLL_NAMES,REF_NAMES)},close:function(){return $.Deferred(function(e){Db.getDb().close(function(){e.resolve()})})},create:function(e){return Db.connect(e).then(function(){return Db.getCollections(COLL_NAMES)}).then(function(){return Db.clearCollections(COLL_NAMES)}).then(function(){return createCollections()})},COLL_NAMES:COLL_NAMES,REF_NAMES:REF_NAMES};
+var Db = require('../db');
+var $ = require('jquery-deferred');
+
+var COLL_NAMES = ['exercises', 'gyms', 'muscles', 'players', 'achievements', 'shop', 'coaches', 'errors'],
+  REF_NAMES = ['exercises', 'gyms', 'muscles', 'achievements', 'shop'],
+  INDEX = {
+    'players': {
+      'score': -1
+    },
+    'coaches': {
+      'q': -1
+    }
+  };
+
+module.exports = {
+  init: function(DB_INSTANCE) {
+    return Db.init(DB_INSTANCE, COLL_NAMES, REF_NAMES);
+  },
+  close: function() {
+    return $.Deferred(function(defer) {
+      Db.getDb().close(function() {
+        defer.resolve();
+      });
+    });
+  },
+  create: function(DB_INSTANCE) {
+    return Db.connect(DB_INSTANCE)
+      .then(function() {
+        return Db.getCollections(COLL_NAMES);
+      })
+      .then(function() {
+        return Db.clearCollections(COLL_NAMES);
+      })
+      .then(function() {
+        return createCollections();
+      });
+  },
+  COLL_NAMES: COLL_NAMES,
+  REF_NAMES: REF_NAMES
+};
+
+function createColl(name) {
+  var values = require('./collections/' + name)[name];
+  return Db.insert(name, values)
+    .then(function() {
+      return Db.ensureIndex(name, INDEX[name]);
+    });
+}
+
+function createCollections() {
+  var defers = [];
+  COLL_NAMES.forEach(function(name) {
+    defers.push(createColl(name));
+  });
+  return $.when.apply($, defers);
+}

@@ -1,1 +1,666 @@
-function checkAchGroup(t,n){var r=t["private"].achievements,e=!0;return n.forEach(function(t){return-1===r.indexOf(t)?(e=!1,!1):void 0}),e}function addExercise(t,n,r){0===$.grep(t["public"].exercises,function(t){return t._id===n}).length&&(t["public"].exercises.push({_id:n}),r.purchase={success:!0,type:"exercises",id:n})}function addGym(t,n,r){-1===t["private"].gyms.indexOf(n)&&(t["private"].gyms.push(n),r.purchase={success:!0,type:"gyms",id:n})}function round(t){return Math.round(100*t)/100}var Db=require("../db"),Player=require("./player"),Coach=require("./coach"),$=require("jquery-deferred"),Achs=require("../gymdb/collections/achievements"),achList={100:function(t,n){return checkAchGroup(t,[101,102,103,104,105,106,107,108,109])},101:function(t,n){return t["private"].coach},102:function(t,n){return n.player&&n.player["public"].coach},103:function(t,n){return 1===n.id&&n.fact>=1&&n.weight>=0},104:function(t,n){return 2===n.id&&n.fact>=1&&n.weight>=40},105:function(t,n){return"success"===n.job},106:function(t,n,r){return 0===t["private"].garb},107:function(t,n){var r=n.purchase;return r?"food"===r.type&&r.success===!0:!1},108:function(t,n){var r=n.purchase;return r?"rest"===r.type&&r.success===!0:!1},109:function(t,n){return 1==n.levelChange},200:function(t,n){return checkAchGroup(t,[201,202,203,204,205,206,207,208])},201:function(t,n){return 0===n.id&&n.fact>=1&&n.weight>=0},202:function(t,n){return 1===n.id&&n.fact>=2&&n.weight>=0},203:function(t,n){var r=n.purchase;return r?"stimul"===r.type&&r.success===!0&&2===r.id:!1},204:function(t,n){var r=n.purchase;return r?"stimul"===r.type&&r.success===!0&&0===r.id:!1},205:function(t,n){var r=n.purchase;return r?"hs"===r.type&&r.success===!0:!1},206:function(t,n){var r=n.purchase;return r?"gl"===r.type&&r.success===!0:!1},207:function(t,n){var r=n.purchase;return r?"bd"===r.type&&r.success===!0:!1},208:function(t,n){return t["private"].friends>=3},300:function(t,n){return checkAchGroup(t,[301,302,303,304,305,306,307,308])},301:function(t,n){return 1===n.id&&n.fact>=5&&n.weight>=0},302:function(t,n){var r=n.purchase;return r?"stimul"===r.type&&r.success===!0&&1===r.id:!1},303:function(t,n){var r=n.purchase;return r?"stimul"===r.type&&r.success===!0&&3===r.id:!1},304:function(t,n){var r=n.purchase;return r?"sh"===r.type&&r.success===!0:!1},305:function(t,n){var r=n.purchase;return r?"ts"===r.type&&r.success===!0:!1},306:function(t,n){var r=n.purchase;return r?"sn"===r.type&&r.success===!0:!1},307:function(t,n){return n.rank>=0},308:function(t,n){return t["private"].friends>=5},400:function(t,n){return checkAchGroup(t,[401,402,403,404,405,406])},401:function(t,n){return 2===n.id&&n.fact>=10&&n.weight>=80},402:function(t,n){return 3===n.id&&n.fact>=10&&n.weight>=115},403:function(t,n){return 4===n.id&&n.fact>=10&&n.weight>=125},404:function(t,n){var r=t["public"].level>=15;return r&&(t["public"].coach||(n.coach=!0,t["public"].coach=Coach.create(t._id))),r},405:function(t,n){return t["private"].friends>=8},406:function(t,n){return n.rank>=2},500:function(t,n){return checkAchGroup(t,[501,502,503,504,505,506])},501:function(t,n){return 2===n.id&&n.fact>=10&&n.weight>=105},502:function(t,n){return 3===n.id&&n.fact>=10&&n.weight>=180},503:function(t,n){return 4===n.id&&n.fact>=10&&n.weight>=200},504:function(t,n){return t["public"].coach&&t["public"].coach.q>20},505:function(t,n){return t["private"].friends>=12},506:function(t,n){return n.rank>=3},600:function(t,n){return checkAchGroup(t,[601,602,603,604,605,606])},601:function(t,n){return 0===n.id&&n.fact>=10&&n.weight>=80},602:function(t,n){return 7===n.id&&n.fact>=10&&n.weight>=170},603:function(t,n){return 5===n.id&&n.fact>=10&&n.weight>=115},604:function(t,n){return t["public"].coach&&t["public"].coach.q>40},605:function(t,n){return t["private"].friends>=15},606:function(t,n){return n.rank>=4},700:function(t,n){return checkAchGroup(t,[701,702,703,704,705,706])},701:function(t,n){return 10===n.id&&n.fact>=10&&n.weight>=500},702:function(t,n){return 7===n.id&&n.fact>=20&&n.weight>=90},703:function(t,n){return 1===n.id&&n.fact>=15&&n.weight>=75},704:function(t,n){return t["public"].coach&&t["public"].coach.q>70},705:function(t,n){return t["private"].friends>=20},706:function(t,n){return n.rank>=5},800:function(t,n){return checkAchGroup(t,[801,802,803,804,805,806,807,808,809,810,811,812,813])},801:function(t,n){return 1==t["private"].body[0].stress},802:function(t,n){return 1==t["private"].body[1].stress},803:function(t,n){return 1==t["private"].body[2].stress},804:function(t,n){return 1==t["private"].body[3].stress},805:function(t,n){return 1==t["private"].body[4].stress},806:function(t,n){return 1==t["private"].body[5].stress},807:function(t,n){return 1==t["private"].body[6].stress},808:function(t,n){return 1==t["private"].body[7].stress},809:function(t,n){return 1==t["private"].body[8].stress},810:function(t,n){return 1==t["private"].body[9].stress},811:function(t,n){return 1==t["private"].body[10].stress},812:function(t,n){return 1==t["private"].body[13].stress},813:function(t){var n=!0;return t["private"].body.forEach(function(t){return 1!=t.stress?(n=!1,!1):void 0}),n},900:function(t,n){return checkAchGroup(t,[901,902,903,904,905,906,907,908,909,910])},901:function(t,n){return t["public"].mass&&t["public"].mass>=53},902:function(t,n){return t["public"].mass&&t["public"].mass>=59},903:function(t,n){return t["public"].mass&&t["public"].mass>=66},904:function(t,n){return t["public"].mass&&t["public"].mass>=74},905:function(t,n){return t["public"].mass&&t["public"].mass>=83},906:function(t,n){return t["public"].mass&&t["public"].mass>=93},907:function(t,n){return t["public"].mass&&t["public"].mass>=105},908:function(t,n){return t["public"].mass&&t["public"].mass>=120},909:function(t,n){return t["public"].mass&&t["public"].mass>=130},910:function(t,n){return t["public"].mass&&t["public"].mass>=140},1e3:function(t,n){return checkAchGroup(t,[1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1011,1012,1013,1014,1015,1016,1017,1018,1019,1020])},1001:function(t,n){return 4===n.id&&n.fact>=1&&n.weight>=180},1001:function(t,n){return 6===n.id&&n.fact>=1&&n.weight>=60},1003:function(t,n){return 7===n.id&&n.fact>=1&&n.weight>=120},1004:function(t,n){return 5===n.id&&n.fact>=1&&n.weight>=110},1005:function(t,n){return 0===n.id&&n.fact>=1&&n.weight>=100},1006:function(t,n){return 1===n.id&&n.fact>=1&&n.weight>=100},1007:function(t,n){return 2===n.id&&n.fact>=1&&n.weight>=170},1008:function(t,n){return 3===n.id&&n.fact>=1&&n.weight>=250},1009:function(t,n){return 4===n.id&&n.fact>=1&&n.weight>=280},1010:function(t,n){return 6===n.id&&n.fact>=1&&n.weight>=120},1011:function(t,n){return 7===n.id&&n.fact>=1&&n.weight>=200},1012:function(t,n){return 5===n.id&&n.fact>=1&&n.weight>=150},1013:function(t,n){return 0===n.id&&n.fact>=1&&n.weight>=160},1014:function(t,n){return 1===n.id&&n.fact>=1&&n.weight>=160},1015:function(t,n){return 2===n.id&&n.fact>=1&&n.weight>=230},1016:function(t,n){return 3===n.id&&n.fact>=1&&n.weight>=260},1017:function(t,n){return 4===n.id&&n.fact>=1&&n.weight>=390},1018:function(t,n){return 6===n.id&&n.fact>=1&&n.weight>=180},1019:function(t,n){return 7===n.id&&n.fact>=1&&n.weight>=330},1020:function(t,n){return 5===n.id&&n.fact>=1&&n.weight>=220}};module.exports={handler:function(t,n,r){var e=t.player;if("object"==typeof n&&n!==e){var u=[],i=e["private"].achievements;for(var c in achList){var s=achList[c];if(c=parseInt(c),-1===i.indexOf(c)&&s(e,n,r)){var o=$.grep(Achs.achievements,function(t){return t._id==c})[0],f=o.oldId?-1!==i.indexOf(o.oldId):!1;u.push(c),i.push(c),f||(o.prize.money&&(e["private"].money+=o.prize.money,n.money=o.prize.money),o.prize.gold&&(e["private"].gold+=o.prize.gold,n.gold=o.prize.gold),"exercises"===o.prize.type&&addExercise(e,o.prize.id,n),"gyms"===o.prize.type&&addGym(e,o.prize.id,n))}}u.length>0&&(n.newAchievements=u,t.isDirty=!0)}}};
+var Db = require('../db');
+var Player = require('./player');
+var Coach = require('./coach');
+var $ = require('jquery-deferred');
+var Achs = require('../gymdb/collections/achievements');
+
+function checkAchGroup(player, ids) {
+  var ach = player.private.achievements;
+  var res = true;
+  ids.forEach(function(id) {
+    if (ach.indexOf(id) === -1) {
+      res = false;
+      return false;
+    }
+  });
+  return res;
+}
+
+var achList = {
+
+  // -------------------------------------------------------------------------- Ученик
+  100: function(player, result) {
+    return checkAchGroup(player, [101, 102, 103, 104, 105, 106, 107, 108, 109]);
+  },
+
+  // Перейти на страницу к тренеру
+  101: function(player, result) {
+    return player.private.coach;
+  },
+
+  // Нанять тренера
+  102: function(player, result) {
+    return result.player && result.player.public.coach;
+  },
+
+  // Брусья 1 повтор
+  103: function(player, result) {
+    return result.id === 1 && result.fact >= 1 && result.weight >= 0;
+  },
+
+  // Жим 40 кг
+  104: function(player, result) {
+    return result.id === 2 && result.fact >= 1 && result.weight >= 40;
+  },
+
+  // Сбор штанги
+  105: function(player, result) {
+    return result.job === 'success';
+  },
+
+  // Уборка
+  106: function(player, result, req) {
+    return player.private.garb === 0;
+  },
+
+  // Купить еды
+  107: function(player, result) {
+    var p = result.purchase;
+    if (!p)
+      return false;
+    return p.type === 'food' && p.success === true;
+  },
+
+  // Отдохнуть
+  108: function(player, result) {
+    var p = result.purchase;
+    if (!p)
+      return false;
+    return p.type === 'rest' && p.success === true;
+  },
+
+  // Перейти на новый уровень
+  109: function(player, result) {
+    return result.levelChange == 1;
+  },
+
+  // -------------------------------------------------------------------- Новичок
+  200: function(player, result) {
+    return checkAchGroup(player, [201, 202, 203, 204, 205, 206, 207, 208]);
+  },
+
+  // Турник
+  201: function(player, result) {
+    return result.id === 0 && result.fact >= 1 && result.weight >= 0;
+  },
+
+  // Брусья 2 раза
+  202: function(player, result) {
+    return result.id === 1 && result.fact >= 2 && result.weight >= 0;
+  },
+
+  // Купить энергетик
+  203: function(player, result) {
+    var p = result.purchase;
+    if (!p)
+      return false;
+    return p.type === 'stimul' && p.success === true && p.id === 2;
+  },
+
+  // Купить протеин
+  204: function(player, result) {
+    var p = result.purchase;
+    if (!p)
+      return false;
+    return p.type === 'stimul' && p.success === true && p.id === 0;
+  },
+
+  // Купить причу
+  205: function(player, result) {
+    var p = result.purchase;
+    if (!p)
+      return false;
+    return p.type === 'hs' && p.success === true;
+  },
+
+  // Купить очки
+  206: function(player, result) {
+    var p = result.purchase;
+    if (!p)
+      return false;
+    return p.type === 'gl' && p.success === true;
+  },
+
+  // Купить бороду
+  207: function(player, result) {
+    var p = result.purchase;
+    if (!p)
+      return false;
+    return p.type === 'bd' && p.success === true;
+  },
+
+  // Пригласить 3
+  208: function(player, result) {
+    return player.private.friends >= 3;
+  },
+
+  // -------------------------------------------------------------------- Разрядник
+  300: function(player, result) {
+    return checkAchGroup(player, [301, 302, 303, 304, 305, 306, 307, 308]);
+  },
+
+  // Брусья 5 раз
+  301: function(player, result) {
+    return result.id === 1 && result.fact >= 5 && result.weight >= 0;
+  },
+
+  // Купить креатин
+  302: function(player, result) {
+    var p = result.purchase;
+    if (!p)
+      return false;
+    return p.type === 'stimul' && p.success === true && p.id === 1;
+  },
+
+  // Купить суперэнергетик
+  303: function(player, result) {
+    var p = result.purchase;
+    if (!p)
+      return false;
+    return p.type === 'stimul' && p.success === true && p.id === 3;
+  },
+
+  // Купить шорты
+  304: function(player, result) {
+    var p = result.purchase;
+    if (!p)
+      return false;
+    return p.type === 'sh' && p.success === true;
+  },
+
+  // Купить майку
+  305: function(player, result) {
+    var p = result.purchase;
+    if (!p)
+      return false;
+    return p.type === 'ts' && p.success === true;
+  },
+
+  // Купить кросы
+  306: function(player, result) {
+    var p = result.purchase;
+    if (!p)
+      return false;
+    return p.type === 'sn' && p.success === true;
+  },
+
+  // 3 разряд
+  307: function(player, result) {
+    return result.rank >= 0;
+  },
+
+  // Пригласить 5
+  308: function(player, result) {
+    return player.private.friends >= 5;
+  },
+
+  // -------------------------------------------------------------------- Тренер
+  400: function(player, result) {
+    return checkAchGroup(player, [401, 402, 403, 404, 405, 406]);
+  },
+
+  // Жим 80 кг 10 раз
+  401: function(player, result) {
+    return result.id === 2 && result.fact >= 10 && result.weight >= 80;
+  },
+
+  // Присед 115 кг 10 раз
+  402: function(player, result) {
+    return result.id === 3 && result.fact >= 10 && result.weight >= 115;
+  },
+
+  // Становая 125 кг 10 раз
+  403: function(player, result) {
+    return result.id === 4 && result.fact >= 10 && result.weight >= 125;
+  },
+
+  // Стать тренером
+  404: function(player, result) {
+    var isCompleted = player.public.level >= 15;
+    if (isCompleted) {
+      if (!player.public.coach) {
+        result.coach = true;
+        player.public.coach = Coach.create(player._id);
+      }
+    }
+    return isCompleted;
+  },
+
+  // Пригласить 8
+  405: function(player, result) {
+    return player.private.friends >= 8;
+  },
+
+  // 1 разряд
+  406: function(player, result) {
+    return result.rank >= 2;
+  },
+
+  // -------------------------------------------------------------------- КМС
+  500: function(player, result) {
+    return checkAchGroup(player, [501, 502, 503, 504, 505, 506]);
+  },
+
+  // Жим 105 кг 10 раз
+  501: function(player, result) {
+    return result.id === 2 && result.fact >= 10 && result.weight >= 105;
+  },
+
+  // Присед 180 кг 10 раз
+  502: function(player, result) {
+    return result.id === 3 && result.fact >= 10 && result.weight >= 180;
+  },
+
+  // Становая 200 кг 10 раз
+  503: function(player, result) {
+    return result.id === 4 && result.fact >= 10 && result.weight >= 200;
+  },
+
+  // 20 учеников
+  504: function(player, result) {
+    return player.public.coach && player.public.coach.q > 20;
+  },
+
+  // Пригласить 12
+  505: function(player, result) {
+    return player.private.friends >= 12;
+  },
+
+  // КМС
+  506: function(player, result) {
+    return result.rank >= 3;
+  },
+
+  // -------------------------------------------------------------------- Мастер
+  600: function(player, result) {
+    return checkAchGroup(player, [601, 602, 603, 604, 605, 606]);
+  },
+
+  // Подтягивание 80 кг 10 раз
+  601: function(player, result) {
+    return result.id === 0 && result.fact >= 10 && result.weight >= 80;
+  },
+
+  // Шраги 170 кг 10 раз
+  602: function(player, result) {
+    return result.id === 7 && result.fact >= 10 && result.weight >= 170;
+  },
+
+  // Тяга 125 кг 10 раз
+  603: function(player, result) {
+    return result.id === 5 && result.fact >= 10 && result.weight >= 115;
+  },
+
+  // 40 учеников
+  604: function(player, result) {
+    return player.public.coach && player.public.coach.q > 40;
+  },
+
+  // Пригласить 15
+  605: function(player, result) {
+    return player.private.friends >= 15;
+  },
+
+  // МС
+  606: function(player, result) {
+    return result.rank >= 4;
+  },
+
+  // -------------------------------------------------------------------- МСМК
+  700: function(player, result) {
+    return checkAchGroup(player, [701, 702, 703, 704, 705, 706]);
+  },
+
+  // Жим ногами 500 кг 10 раз
+  701: function(player, result) {
+    return result.id === 10 && result.fact >= 10 && result.weight >= 500;
+  },
+
+  // Бицепс 90 кг 20 раз
+  702: function(player, result) {
+    return result.id === 7 && result.fact >= 20 && result.weight >= 90;
+  },
+
+  // Брусья 75 кг 15 раз
+  703: function(player, result) {
+    return result.id === 1 && result.fact >= 15 && result.weight >= 75;
+  },
+
+  // 70 учеников
+  704: function(player, result) {
+    return player.public.coach && player.public.coach.q > 70;
+  },
+
+  // Пригласить 20
+  705: function(player, result) {
+    return player.private.friends >= 20;
+  },
+
+  // МСМК
+  706: function(player, result) {
+    return result.rank >= 5;
+  },
+
+  // -------------------------------------------------------------------- Трудяга
+  800: function(player, result) {
+    return checkAchGroup(player, [801, 802, 803, 804, 805, 806, 807, 808, 809, 810, 811, 812, 813]);
+  },
+
+  // Шея 100%
+  801: function(player, result) {
+    return player.private.body[0].stress == 1;
+  },
+
+  // Трапы 100%
+  802: function(player, result) {
+    return player.private.body[1].stress == 1;
+  },
+
+  // Дельты 100%
+  803: function(player, result) {
+    return player.private.body[2].stress == 1;
+  },
+
+  // Бицепс 100%
+  804: function(player, result) {
+    return player.private.body[3].stress == 1;
+  },
+
+  // Трицепс 100%
+  805: function(player, result) {
+    return player.private.body[4].stress == 1;
+  },
+
+  // Предплечье 100%
+  806: function(player, result) {
+    return player.private.body[5].stress == 1;
+  },
+
+  // Грудь 100%
+  807: function(player, result) {
+    return player.private.body[6].stress == 1;
+  },
+
+  // Косые 100%
+  808: function(player, result) {
+    return player.private.body[7].stress == 1;
+  },
+
+  // Прямые 100%
+  809: function(player, result) {
+    return player.private.body[8].stress == 1;
+  },
+
+  // Круглые 100%
+  810: function(player, result) {
+    return player.private.body[9].stress == 1;
+  },
+
+  // Широчайшие 100%
+  811: function(player, result) {
+    return player.private.body[10].stress == 1;
+  },
+
+  // Квадрицепс 100%
+  812: function(player, result) {
+    return player.private.body[13].stress == 1;
+  },
+
+  // Все мышцы 100%
+  813: function(player) {
+    var isCompleted = true;
+    player.private.body.forEach(function(m) {
+      if (m.stress != 1) {
+        isCompleted = false;
+        return false;
+      }
+    });
+    return isCompleted;
+  },
+
+  // -------------------------------------------------------------------- Бодибилдер
+  900: function(player, result) {
+    return checkAchGroup(player, [901, 902, 903, 904, 905, 906, 907, 908, 909, 910]);
+  },
+
+  // Весовая 59
+  901: function(player, result) {
+    return player.public.mass && player.public.mass >= 53;
+  },
+
+  // Весовая 66
+  902: function(player, result) {
+    return player.public.mass && player.public.mass >= 59;
+  },
+
+  // Весовая 74
+  903: function(player, result) {
+    return player.public.mass && player.public.mass >= 66;
+  },
+
+  // Весовая 83
+  904: function(player, result) {
+    return player.public.mass && player.public.mass >= 74;
+  },
+
+  // Весовая 93
+  905: function(player, result) {
+    return player.public.mass && player.public.mass >= 83;
+  },
+
+  // Весовая 105
+  906: function(player, result) {
+    return player.public.mass && player.public.mass >= 93;
+  },
+
+  // Весовая 120
+  907: function(player, result) {
+    return player.public.mass && player.public.mass >= 105;
+  },
+
+  // Весовая 130
+  908: function(player, result) {
+    return player.public.mass && player.public.mass >= 120;
+  },
+
+  // Весовая 140
+  909: function(player, result) {
+    return player.public.mass && player.public.mass >= 130;
+  },
+
+  // Весовая 150
+  910: function(player, result) {
+    return player.public.mass && player.public.mass >= 140;
+  },
+
+  // -------------------------------------------------------------------- Силовой экстрим
+  1000: function(player, result) {
+    return checkAchGroup(player, [1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010,
+      1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020
+    ]);
+  },
+
+  // Становая тяга 180 кг на 1 раз
+  1001: function(player, result) {
+    return result.id === 4 && result.fact >= 1 && result.weight >= 180;
+  },
+
+  // Подъем на бицепс 60 кг на 1 раз
+  1001: function(player, result) {
+    return result.id === 6 && result.fact >= 1 && result.weight >= 60;
+  },
+
+  // Шраги 120 кг на 1 раз
+  1003: function(player, result) {
+    return result.id === 7 && result.fact >= 1 && result.weight >= 120;
+  },
+
+  // Сделать тягу к поясу 110 кг на 1 раз
+  1004: function(player, result) {
+    return result.id === 5 && result.fact >= 1 && result.weight >= 110;
+  },
+
+  // Подтянуться с весом 100 раз 
+  1005: function(player, result) {
+    return result.id === 0 && result.fact >= 1 && result.weight >= 100;
+  },
+
+  // Отжаться на брусьях с весом 100 раз
+  1006: function(player, result) {
+    return result.id === 1 && result.fact >= 1 && result.weight >= 100;
+  },
+
+  // Жим лежа 170 кг на 1 раз
+  1007: function(player, result) {
+    return result.id === 2 && result.fact >= 1 && result.weight >= 170;
+  },
+
+  // Приседания со штангой 250 кг на 1 раз
+  1008: function(player, result) {
+    return result.id === 3 && result.fact >= 1 && result.weight >= 250;
+  },
+
+  // Становая тяга 280 кг на 1 раз
+  1009: function(player, result) {
+    return result.id === 4 && result.fact >= 1 && result.weight >= 280;
+  },
+
+  // Подъем на бицепс 120 кг на 1 раз
+  1010: function(player, result) {
+    return result.id === 6 && result.fact >= 1 && result.weight >= 120;
+  },
+
+  // Шраги 200 кг на 1 раз
+  1011: function(player, result) {
+    return result.id === 7 && result.fact >= 1 && result.weight >= 200;
+  },
+
+  // Сделать тягу к поясу 150 кг на 1 раз
+  1012: function(player, result) {
+    return result.id === 5 && result.fact >= 1 && result.weight >= 150;
+  },
+
+  // Подтянуться с весом 160 раз 
+  1013: function(player, result) {
+    return result.id === 0 && result.fact >= 1 && result.weight >= 160;
+  },
+
+  // Отжаться на брусьях с весом 160 раз
+  1014: function(player, result) {
+    return result.id === 1 && result.fact >= 1 && result.weight >= 160;
+  },
+
+  // Жим лежа 230 кг на 1 раз
+  1015: function(player, result) {
+    return result.id === 2 && result.fact >= 1 && result.weight >= 230;
+  },
+
+  // Приседания со штангой 360 кг на 1 раз
+  1016: function(player, result) {
+    return result.id === 3 && result.fact >= 1 && result.weight >= 260;
+  },
+
+  // Становая тяга 390 кг на 1 раз
+  1017: function(player, result) {
+    return result.id === 4 && result.fact >= 1 && result.weight >= 390;
+  },
+
+  // Подъем на бицепс 180 кг на 1 раз
+  1018: function(player, result) {
+    return result.id === 6 && result.fact >= 1 && result.weight >= 180;
+  },
+
+  // Шраги 330 кг на 1 раз
+  1019: function(player, result) {
+    return result.id === 7 && result.fact >= 1 && result.weight >= 330;
+  },
+
+  // Сделать тягу к поясу 220 кг на 1 раз
+  1020: function(player, result) {
+    return result.id === 5 && result.fact >= 1 && result.weight >= 220;
+  }
+
+};
+
+function addExercise(player, id, result) {
+  if ($.grep(player.public.exercises, function(ex) {
+    return ex._id === id;
+  }).length === 0) {
+    player.public.exercises.push({
+      _id: id
+    });
+    result.purchase = {
+      success: true,
+      type: 'exercises',
+      id: id
+    }
+  }
+}
+
+function addGym(player, id, result) {
+  if (player.private.gyms.indexOf(id) === -1) {
+    player.private.gyms.push(id);
+    result.purchase = {
+      success: true,
+      type: 'gyms',
+      id: id
+    }
+  }
+}
+
+module.exports = {
+  handler: function(session, result, req) {
+    var player = session.player;
+    if (typeof result !== 'object' || result === player)
+      return;
+
+    var newAchievements = [];
+    var achievements = player.private.achievements;
+    for (var i in achList) {
+      var ach = achList[i];
+      i = parseInt(i);
+      if (achievements.indexOf(i) !== -1)
+        continue;
+
+      if (ach(player, result, req)) {
+
+        var a = $.grep(Achs.achievements, function(a) {
+          return a._id == i;
+        })[0];
+
+        var noPrize = a.oldId ? (achievements.indexOf(a.oldId) !== -1 ? true : false) : false;
+
+        newAchievements.push(i);
+        achievements.push(i);
+
+        if (!noPrize) {
+          if (a.prize.money) {
+            player.private.money += a.prize.money;
+            result.money = a.prize.money;
+          }
+
+          if (a.prize.gold) {
+            player.private.gold += a.prize.gold;
+            result.gold = a.prize.gold;
+          }
+
+          if (a.prize.type === 'exercises') {
+            addExercise(player, a.prize.id, result)
+          }
+
+          if (a.prize.type === 'gyms') {
+            addGym(player, a.prize.id, result)
+          }
+        }
+      }
+    };
+    if (newAchievements.length > 0) {
+      result.newAchievements = newAchievements;
+      session.isDirty = true;
+    }
+  }
+};
+
+function round(v) {
+  return Math.round(v * 100) / 100;
+}

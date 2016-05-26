@@ -1,1 +1,69 @@
-var Db=require("../db"),$=require("jquery-deferred"),job=require("./job"),self=require("./self"),workout=require("./workout"),curve=require("../controllers/curve");module.exports={"default":{params:{player:{required:!0,parseMethod:JSON.parse}},handler:function(e,r){var t=r.player,a=$.Deferred(),o=curve.getMass(t["public"].level),i=["Подтягивание","Брусья","Жимлежа","Присед","Сумо","Тяга в наклоне","Подъемы на бицепс"],s={};i.forEach(function(e,r){weightMax=workout.getTotalWeightMax(t,r),s[e]={weightMax:weightMax};var a=weightMax,i=Db.getRefs().exercises[r];i.selfweight&&(a-=o),0>a&&(a=0),[.9*a,.8*a,0].forEach(function(a){var o=workout.getRepeatsAndEff(t,r,a,weightMax);s[e][a]="repeatsMax = "+o.repeatsMax.toFixed(2)+" (effWeight = "+o.weightEffect.toFixed(2)+")"})});var u={mass:o,job:{period:"each "+job.PERIOD+" minutes",expectTime:job.getExpectTime(t),isStartedAlready:job.isStartedAlready(t)},stat:self.getPlayerStat(t),regen:self.getRegen(t),workout:s};return a.resolve(u),a}}};
+var Db = require('../db');
+var $ = require('jquery-deferred');
+var job = require('./job');
+var self = require('./self');
+var workout = require('./workout');
+var curve = require('../controllers/curve');
+
+module.exports = {
+  default: {
+    params: {
+      player: {
+        required: true,
+        parseMethod: JSON.parse
+      }
+    },
+    handler: function(session, params) {
+      var player = params.player;
+
+      var defer = $.Deferred();
+
+      var mass = curve.getMass(player.public.level);
+
+      var exercises = [
+        "Подтягивание",
+        "Брусья",
+        "Жимлежа",
+        "Присед",
+        "Сумо",
+        "Тяга в наклоне",
+        "Подъемы на бицепс",
+      ];
+
+      var workoutResult = {};
+
+      exercises.forEach(function(ex, i) {
+        weightMax = workout.getTotalWeightMax(player, i);
+        workoutResult[ex] = {
+          weightMax: weightMax
+        };
+        var w = weightMax;
+        var exRef = Db.getRefs().exercises[i];
+        if (exRef.selfweight)
+          w -= mass;
+        if (w < 0)
+          w = 0;
+        [w * 0.9, w * 0.8, 0].forEach(function(weight) {
+          var meta = workout.getRepeatsAndEff(player, i, weight, weightMax);
+          workoutResult[ex][weight] = 'repeatsMax = ' + meta.repeatsMax.toFixed(2) + ' (effWeight = ' + meta.weightEffect.toFixed(2) + ')';
+        });
+      });
+
+      var result = {
+        mass: mass,
+        job: {
+          period: 'each ' + job.PERIOD + ' minutes',
+          expectTime: job.getExpectTime(player),
+          isStartedAlready: job.isStartedAlready(player)
+        },
+        stat: self.getPlayerStat(player),
+        regen: self.getRegen(player),
+        workout: workoutResult,
+      };
+
+      defer.resolve(result);
+
+      return defer;
+    }
+  }
+};

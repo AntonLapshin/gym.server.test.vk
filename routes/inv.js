@@ -1,1 +1,47 @@
-function set(e,r,s){var u=e.player["public"][r+"s"];return u&&-1!=u.indexOf(s)?(e.player["public"][r]=s,e.isDirty=!0,!0):!1}var Db=require("../db"),$=require("jquery-deferred");module.exports={"default":{params:{type:{required:!0},id:{required:!0,parseMethod:parseInt}},handler:function(e,r){var s=r.type,u=r.id,d={success:!0};if("hs"===s||"bd"===s||"gl"===s){var i=set(e,s,u);i||(d.success=!1)}var a=$.Deferred();return a.resolve(d),a}}};
+var Db = require('../db'),
+  $ = require('jquery-deferred');
+
+module.exports = {
+  default: {
+    params: {
+      type: {
+        required: true,
+      },
+      id: {
+        required: true,
+        parseMethod: parseInt
+      }
+    },
+    handler: function(session, params) {
+      var type = params.type;
+      var id = params.id;
+
+      var answer = {
+        success: true
+      };
+
+      if (type === 'hs' || type === 'bd' || type === 'gl') {
+        var result = set(session, type, id);
+        if (!result) {
+          answer.success = false;
+        }
+      }
+
+      var defer = $.Deferred();
+
+      defer.resolve(answer);
+
+      return defer;
+    }
+  }
+};
+
+function set(session, type, id) {
+  var storage = session.player.public[type + 's']
+  if (!storage || storage.indexOf(id) == -1) {
+    return false;
+  }
+  session.player.public[type] = id;
+  session.isDirty = true;
+  return true
+}

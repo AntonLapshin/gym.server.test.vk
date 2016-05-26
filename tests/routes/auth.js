@@ -1,1 +1,47 @@
-var Player=require("../../controllers/player"),GymDb=require("../../gymdb/gymdb"),Auth=require("../../routes/auth"),PLAYER_ID=0,AUTH_KEY="884e02e93401a63c16614681a2a82808",AUTH_KEY_WRONG="wrong";module.exports={setUp:function(e){GymDb.init().then(e,console.log)},tearDown:function(e){GymDb.close().then(e,console.log)},authSuccess:function(e){var n={},t={playerId:PLAYER_ID,authKey:AUTH_KEY};Auth["default"].handler(n,t).then(function(t){e.equal(t,Auth.MES_SUCCESS),e.equal(n.player._id,PLAYER_ID),e.done()},console.log)},authFail:function(e){var n={},t={playerId:PLAYER_ID,authKey:AUTH_KEY_WRONG};Auth["default"].handler(n,t).then(function(){},function(n){e.equal(n,Auth.ERR_AUTH_FAIL),e.done()})}};
+var Player = require('../../controllers/player'),
+    GymDb = require('../../gymdb/gymdb'),
+    Auth = require('../../routes/auth');
+
+var PLAYER_ID = 0,
+    AUTH_KEY = '884e02e93401a63c16614681a2a82808',
+    AUTH_KEY_WRONG = 'wrong';
+
+module.exports = {
+    setUp: function (callback) {
+        GymDb.init().then(callback, console.log);
+    },
+    tearDown: function (callback) {
+        GymDb.close().then(callback, console.log);
+    },
+    authSuccess: function (test) {
+        var session = {},
+            params = {
+                playerId: PLAYER_ID,
+                authKey: AUTH_KEY
+            };
+
+        Auth.default.handler(session, params).then(
+            function (answer) {
+                test.equal(answer, Auth.MES_SUCCESS);
+                test.equal(session.player._id, PLAYER_ID);
+                test.done();
+            },
+            console.log
+        );
+    },
+    authFail: function (test) {
+        var session = {},
+            params = {
+                playerId: PLAYER_ID,
+                authKey: AUTH_KEY_WRONG
+            };
+
+        Auth.default.handler(session, params).then(
+            function () {
+            }, function(answer){
+                test.equal(answer, Auth.ERR_AUTH_FAIL);
+                test.done();
+            }
+        );
+    }
+};

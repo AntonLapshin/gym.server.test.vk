@@ -1,1 +1,80 @@
-function add(e,r,s){e.player["public"][r]=s,e.player["public"][r+"s"]||(e.player["public"][r+"s"]=[]),-1==e.player["public"][r+"s"].indexOf(s)&&e.player["public"][r+"s"].push(s)}var Db=require("../db"),$=require("jquery-deferred"),_rates={money:20,gold:1},_bonus=.05;module.exports={"default":{params:{type:{required:!0},id:{required:!0,parseMethod:parseInt},real:{required:!0,parseMethod:parseInt}},handler:function(e,r){var s=r.type,a=r.id,i=r.real;if(!(GLOBAL.GYM.test||e.pendingPayment&&e.pendingPayment.amount==i))return $.Deferred(function(e){e.resolve({success:!1})});var p={success:!0,purchase:{type:s,id:a,success:!0}};if("gyms"===s||"food"===s||"rest"===s||"stimul"===s)e.player["private"][s].push(a);else if("exercises"===s)e.player["public"][s].push({_id:a});else if("hs"===s||"bd"===s||"gl"===s||"sh"===s)add(e,s,a);else if("money"===s||"gold"===s){var l=Math.floor(i*_rates[s]+i*_bonus*(i*_rates[s]));e.player["private"][s]+=l,p[s]=l,delete p.purchase}var u=$.Deferred();return e.pendingPayment=null,e.isDirty=!0,u.resolve(p),u}}};
+var Db = require('../db'),
+  $ = require('jquery-deferred');
+
+var _rates = {
+  money: 20,
+  gold: 1
+};
+var _bonus = 0.05;
+
+module.exports = {
+  default: {
+    params: {
+      type: {
+        required: true,
+      },
+      id: {
+        required: true,
+        parseMethod: parseInt
+      },
+      real: {
+        required: true,
+        parseMethod: parseInt
+      }
+    },
+    handler: function(session, params) {
+      var type = params.type;
+      var id = params.id;
+      var real = params.real;
+
+      if (!GLOBAL.GYM.test && (!session.pendingPayment || session.pendingPayment.amount != real)) {
+        return $.Deferred(function(defer) {
+          defer.resolve({
+            success: false
+          });
+        });
+      }
+
+      var answer = {
+        success: true,
+        purchase: {
+          type: type,
+          id: id,
+          success: true
+        }
+      };
+
+      if (type === 'gyms' || type === 'food' || type === 'rest' || type === 'stimul') {
+        session.player.private[type].push(id);
+      } else if (type === 'exercises') {
+        session.player.public[type].push({
+          _id: id
+        });
+      } else if (type === 'hs' || type === 'bd' || type === 'gl' || type === 'sh') {
+        add(session, type, id);
+      } else if (type === 'money' || type === 'gold') {
+        var diff = Math.floor(real * _rates[type] + real * _bonus * (real * _rates[type]));
+        session.player.private[type] += diff;
+        answer[type] = diff;
+        delete answer.purchase;
+      }
+
+      var defer = $.Deferred();
+
+      session.pendingPayment = null;
+      session.isDirty = true;
+      defer.resolve(answer);
+
+      return defer;
+    }
+  }
+};
+
+function add(session, type, id) {
+  session.player.public[type] = id;
+  if (!session.player.public[type + 's']) {
+    session.player.public[type + 's'] = [];
+  }
+  if (session.player.public[type + 's'].indexOf(id) == -1)
+    session.player.public[type + 's'].push(id);
+}

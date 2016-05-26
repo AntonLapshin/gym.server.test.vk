@@ -1,1 +1,333 @@
-function getStress(e){for(var r=Db.getRefs().muscles,t=function(){for(var e=0,t=0;t<r.length;t++)e+=r[t].power;return e},a=t(),l=0,n=0;n<e["private"].body.length;n++){var s=e["private"].body[n],i=r[s._id];l+=i.power*s.stress/a}return l}function update(e){var r=module.exports.getRegen(e);0==r.frazzle&&(r.frazzle=.3),0==r.energy&&(r.energy=.3);var t=new Date,a=DateHelper.intervalHours(Date.parse(t)-Date.parse(new Date(e["private"].reg.lastUpdateTime))),l=$.round(r.frazzle*a),n=$.round(r.tonus*a),s=$.round(e["private"].energy+r.energy*a);s>PlayersCollection.ENERGY_MAX&&(s=PlayersCollection.ENERGY_MAX),e["private"].garb+=Math.round(r.garb*a),e["private"].garb>GARB_MAX&&(e["private"].garb=GARB_MAX),e["private"].energy=s,e["private"].reg.lastUpdateTime=t.getTime();for(var i=0;i<e["private"].body.length;i++){var o=e["private"].body[i];o.frazzle=$.round(o.frazzle-l),o.frazzle<0&&(o.frazzle=0),e["private"].tonus&&(e["private"].tonus[i]=$.round(e["private"].tonus[i]-n),e["private"].tonus[i]<0&&(e["private"].tonus[i]=0))}}function getLevelChange(e,r){var t=new Date,a=Curve.getLevelRequirements(e["public"].level),l=(e["private"].growth||e["private"].growt||0)+r.growth;if(e["public"].level>0&&a>l){var n=DateHelper.addHoursClone(new Date(e["private"].reg.lastCheckLevelUpTime),GLOBAL.GYM.CHECK_LEVELUP_PERIOD);if(n>t)return-2}e["private"].reg.lastCheckLevelUpTime=t.getTime();var s=0;if(l>=a)e["public"].level++,e["private"].growth=0,e["private"].energy=PlayersCollection.ENERGY_MAX,s=1;else{if(0===e["public"].level)return-2;e["private"].growth=l}return e["private"].body.forEach(function(e){e.frazzle=0,e.stress=0}),e["private"].rest=[],e["private"].food=[],e["private"].stimul=[],0===s&&0===e["public"].level?-2:s}var Db=require("../db"),DateHelper=require("../controllers/date"),PlayersCollection=require("../gymdb/collections/players"),Player=require("../controllers/player"),$=require("jquery-deferred"),Curve=require("../controllers/curve"),Rank=require("../controllers/rank"),Stimul=require("../controllers/stimul"),Mass=require("../controllers/mass"),MAX_LEVEL=67,GARB_MAX=14,BONUS_MAX=10;module.exports={getPlayerStat:function(e){for(var r=e["public"].level,t=getStress(e),a=(Curve.getMass(r),Stimul.getFood(e)),l=0,n=0;n<e["private"].rest.length;n++){var s=e["private"].rest[n],i=Db.getRefs().shop[1].items[s];i&&(l+=i.coeff)}l>1&&(l=1);var o=1+Stimul.getGrowth(e),p=t*l*a*o;return{period:"each "+GLOBAL.GYM.CHECK_LEVELUP_PERIOD+" hours",growth:p,stress:t,rest:l,food:a,stimulGrowth:o}},getRegen:function(e){for(var r=0,t=0;t<e["private"].rest.length;t++){var a=e["private"].rest[t],l=Db.getRefs().shop[1].items[a];l&&(r+=l.coeff)}r>1&&(r=1);var n=Stimul.getRegen(e),s={energy:GLOBAL.GYM.REG_ENERGY*(r+n)*PlayersCollection.ENERGY_MAX,frazzle:GLOBAL.GYM.REG_FRAZZLE*(r+n),tonus:GLOBAL.GYM.REG_TONUS,garb:GLOBAL.GYM.REG_GARB};return s.energy<GLOBAL.GYM.REG_ENERGY_SLOW*PlayersCollection.ENERGY_MAX&&(s.energy=GLOBAL.GYM.REG_ENERGY_SLOW*PlayersCollection.ENERGY_MAX),s.frazzle<GLOBAL.GYM.REG_FRAZZLE_SLOW&&(s.frazzle=GLOBAL.GYM.REG_FRAZZLE_SLOW),s},get:{params:{friends:{parseMethod:parseInt},garb:{parseMethod:parseInt},bonus:{parseMethod:parseInt}},handler:function(e,r){var t=$.Deferred(),a=e.player;r.bonus&&(a["private"].money+=Math.min(r.bonus,BONUS_MAX),e.isDirty=!0),r.garb&&(a["private"].garb-=r.garb,a["private"].garb<0&&(a["private"].garb=0),e.isDirty=!0),r.friends&&(a["private"].friends=r.friends,e.isDirty=!0);var l=new Date,n=a["private"].reg,s=DateHelper.addMinutesClone(new Date(n.lastUpdateTime),GLOBAL.GYM.UPDATE_PERIOD);if(s>l)return t.resolve({success:!0,player:a}),t;var i=module.exports.getPlayerStat(a),o=Mass.getMass(a,i.growth);a["public"].mass=o,a["public"].sum=Rank.getSum(a);var p={success:!0,player:a};if(s.getDay()!=l.getDay()){var u=Rank.getSalary(a);u&&(p.money=u.money,a["private"].money+=u.money,u.gold>0&&(p.gold=u.gold,a["private"].gold+=u.gold))}update(a);var v=getLevelChange(a,i);if(1===v){var g=Rank.update(a);null!==g&&(p.rank=g)}return e.isDirty=!0,-2!=v&&(p.levelChange=v),t.resolve(p),t}},getPlayer:{params:{playerId:{required:!0,parseMethod:parseInt}},handler:function(e,r){var t=$.Deferred();return Player.find(r.playerId,{_id:1,"public":1}).then(function(e){t.resolve({success:!0,player:e})}),t}},getPlayers:{params:{playerIds:{required:!0,parseMethod:function(e){var r=[];return e.split(",").forEach(function(e){r.push(parseInt(e))}),r}}},handler:function(e,r){var t=$.Deferred();return Player.getPlayers(r.playerIds).then(function(e){t.resolve({success:!0,players:e})}),t}}};
+var Db = require('../db');
+var DateHelper = require('../controllers/date');
+var PlayersCollection = require('../gymdb/collections/players');
+var Player = require('../controllers/player');
+var $ = require('jquery-deferred');
+var Curve = require('../controllers/curve');
+var Rank = require('../controllers/rank');
+var Stimul = require('../controllers/stimul');
+var Mass = require('../controllers/mass');
+
+var MAX_LEVEL = 67;
+var GARB_MAX = 14;
+var BONUS_MAX = 10;
+
+//
+// Calculates Stress
+//
+function getStress(player) {
+  var muscles = Db.getRefs().muscles;
+  var getPowerAll = function() {
+    var powerAll = 0;
+    for (var i = 0; i < muscles.length; i++) {
+      powerAll += muscles[i].power;
+    }
+    return powerAll;
+  };
+  var powerAll = getPowerAll();
+  var stress = 0;
+  for (var i = 0; i < player.private.body.length; i++) {
+    var muscleBody = player.private.body[i];
+    var muscle = muscles[muscleBody._id];
+
+    stress += muscle.power * muscleBody.stress / powerAll;
+  }
+  return stress;
+}
+
+module.exports = {
+
+  getPlayerStat: function(player) {
+
+    var level = player.public.level;
+
+    var stress = getStress(player);
+
+    //
+    // Calculates mass
+    //
+    var mass = Curve.getMass(level);
+
+    //
+    // Calculates Food
+    //
+    var food = Stimul.getFood(player);
+
+    //
+    // Calculates Rest
+    //
+    var rest = 0;
+    for (var i = 0; i < player.private.rest.length; i++) {
+      var r = player.private.rest[i];
+      var rRef = Db.getRefs().shop[1].items[r];
+      if (rRef)
+        rest += rRef.coeff;
+    }
+    if (rest > 1)
+      rest = 1;
+
+    //
+    // Calculates Stimul Growth
+    //
+    var stimulGrowth = 1 + Stimul.getGrowth(player);
+
+    //
+    // Calclates growth
+    //
+    var growth = stress * rest * food * stimulGrowth;
+
+
+    return {
+      period: 'each ' + GLOBAL.GYM.CHECK_LEVELUP_PERIOD + ' hours',
+      growth: growth,
+      stress: stress,
+      rest: rest,
+      food: food,
+      stimulGrowth: stimulGrowth
+    };
+  },
+
+  getRegen: function(player) {
+    var regRest = 0;
+    for (var i = 0; i < player.private.rest.length; i++) {
+      var r = player.private.rest[i];
+      var rRef = Db.getRefs().shop[1].items[r];
+      if (rRef)
+        regRest += rRef.coeff;
+    }
+    if (regRest > 1)
+      regRest = 1;
+
+    var regStimul = Stimul.getRegen(player);
+
+    var data = {
+      energy: (GLOBAL.GYM.REG_ENERGY * (regRest + regStimul)) * PlayersCollection.ENERGY_MAX,
+      frazzle: GLOBAL.GYM.REG_FRAZZLE * (regRest + regStimul),
+      tonus: GLOBAL.GYM.REG_TONUS,
+      garb: GLOBAL.GYM.REG_GARB
+    };
+
+    if (data.energy < GLOBAL.GYM.REG_ENERGY_SLOW * PlayersCollection.ENERGY_MAX)
+      data.energy = GLOBAL.GYM.REG_ENERGY_SLOW * PlayersCollection.ENERGY_MAX;
+    if (data.frazzle < GLOBAL.GYM.REG_FRAZZLE_SLOW)
+      data.frazzle = GLOBAL.GYM.REG_FRAZZLE_SLOW;
+
+    return data;
+  },
+
+  get: {
+    params: {
+      friends: {
+        parseMethod: parseInt
+      },
+      garb: {
+        parseMethod: parseInt
+      },
+      bonus: {
+        parseMethod: parseInt
+      }
+    },
+    handler: function(session, params) {
+      var defer = $.Deferred();
+      var player = session.player;
+
+      if (params.bonus) {
+        player.private.money += Math.min(params.bonus, BONUS_MAX);
+        session.isDirty = true;
+      }
+
+      if (params.garb) {
+        player.private.garb -= params.garb;
+        if (player.private.garb < 0)
+          player.private.garb = 0;
+        session.isDirty = true;
+      }
+
+      if (params.friends) {
+        player.private.friends = params.friends;
+        session.isDirty = true;
+      }
+
+      var now = new Date();
+      var reg = player.private.reg;
+      var minUpdateTime = DateHelper.addMinutesClone(new Date(reg.lastUpdateTime), GLOBAL.GYM.UPDATE_PERIOD);
+      if (minUpdateTime > now) {
+        defer.resolve({
+          success: true,
+          player: player
+        });
+        return defer;
+      }
+
+      var stat = module.exports.getPlayerStat(player);
+      var mass = Mass.getMass(player, stat.growth);
+      player.public.mass = mass;
+      player.public.sum = Rank.getSum(player);
+
+      var result = {
+        success: true,
+        player: player
+      };
+
+      if (minUpdateTime.getDay() != now.getDay()) {
+        var salary = Rank.getSalary(player);
+        if (salary) {
+          result.money = salary.money;
+          player.private.money += salary.money;
+
+          if (salary.gold > 0) {
+            result.gold = salary.gold;
+            player.private.gold += salary.gold;
+          }
+        }
+      }
+
+      update(player);
+      var levelChange = getLevelChange(player, stat);
+      if (levelChange === 1) {
+        var rankResult = Rank.update(player);
+        if (rankResult !== null)
+          result.rank = rankResult;
+      }
+
+      session.isDirty = true;
+
+      if (levelChange != -2) {
+        result.levelChange = levelChange;
+      }
+
+      defer.resolve(result);
+      return defer;
+    }
+  },
+
+  getPlayer: {
+    params: {
+      playerId: {
+        required: true,
+        parseMethod: parseInt
+      }
+    },
+    handler: function(session, params) {
+      var defer = $.Deferred();
+      Player.find(params.playerId, {
+        '_id': 1,
+        'public': 1
+      }).then(function(player) {
+        defer.resolve({
+          success: true,
+          player: player
+        })
+      });
+      return defer;
+    }
+  },
+
+  getPlayers: {
+    params: {
+      playerIds: {
+        required: true,
+        parseMethod: function(value) {
+          var result = [];
+          value.split(',').forEach(function(val) {
+            result.push(parseInt(val));
+          });
+          return result;
+        }
+      }
+    },
+    handler: function(session, params) {
+      var defer = $.Deferred();
+      Player.getPlayers(params.playerIds).then(function(players) {
+        defer.resolve({
+          success: true,
+          players: players
+        })
+      });
+      return defer;
+    }
+  }
+
+};
+
+// Resting: regenerating energy and muscles (energy->energy_max, frazzle->0)
+// todo: decreasing food and stimulant factors
+function update(player) {
+  var regen = module.exports.getRegen(player);
+  if (regen.frazzle == 0)
+    regen.frazzle = 0.3;
+  if (regen.energy == 0)
+    regen.energy = 0.3;
+
+  var now = new Date();
+  var interval = DateHelper.intervalHours(Date.parse(now) - Date.parse(new Date(player.private.reg.lastUpdateTime)));
+  var frazzleDecrease = $.round(regen.frazzle * interval);
+  var tonusDecrease = $.round(regen.tonus * interval);
+  var energyValue = $.round(player.private.energy + regen.energy * interval);
+
+  if (energyValue > PlayersCollection.ENERGY_MAX)
+    energyValue = PlayersCollection.ENERGY_MAX;
+
+  player.private.garb += Math.round(regen.garb * interval);
+  if (player.private.garb > GARB_MAX)
+    player.private.garb = GARB_MAX;
+
+  player.private.energy = energyValue;
+  player.private.reg.lastUpdateTime = now.getTime();
+
+
+  for (var i = 0; i < player.private.body.length; i++) {
+    var muscle = player.private.body[i];
+    muscle.frazzle = $.round(muscle.frazzle - frazzleDecrease);
+    if (muscle.frazzle < 0)
+      muscle.frazzle = 0;
+    if (player.private.tonus) {
+      player.private.tonus[i] = $.round(player.private.tonus[i] - tonusDecrease);
+      if (player.private.tonus[i] < 0)
+        player.private.tonus[i] = 0;
+    }
+  }
+}
+
+function getLevelChange(player, stat) {
+  var now = new Date();
+
+  var levelRequirements = Curve.getLevelRequirements(player.public.level);
+  var totalGrowth = (player.private.growth || player.private.growt || 0) + stat.growth;
+
+  if (player.public.level > 0 && totalGrowth < levelRequirements) {
+    var minFixTime = DateHelper.addHoursClone(new Date(player.private.reg.lastCheckLevelUpTime), GLOBAL.GYM.CHECK_LEVELUP_PERIOD);
+    if (minFixTime > now)
+      return -2;
+  }
+
+  player.private.reg.lastCheckLevelUpTime = now.getTime();
+
+  var levelUp = 0;
+  if (totalGrowth >= levelRequirements) {
+    player.public.level++;
+    player.private.growth = 0;
+    player.private.energy = PlayersCollection.ENERGY_MAX;
+    levelUp = 1;
+  } else if (player.public.level === 0) {
+    return -2;
+  } else {
+    player.private.growth = totalGrowth;
+  }
+
+  // 
+  // Clear all properties.
+  //
+  player.private.body.forEach(function(m) {
+    m.frazzle = 0;
+    m.stress = 0;
+  });
+
+  player.private.rest = [];
+  player.private.food = [];
+  player.private.stimul = [];
+
+  if (levelUp === 0 && player.public.level === 0)
+    return -2;
+  return levelUp;
+}

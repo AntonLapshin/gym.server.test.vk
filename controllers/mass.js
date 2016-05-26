@@ -1,1 +1,18 @@
-var Curve=require("./curve"),$=require("jquery-deferred");module.exports={getMass:function(e,r){var u=e["public"].level,v=Curve.getMass(u),t=Curve.getMass(u+1),s=Curve.getLevelRequirements(u),a=((e["private"].growth||0)+r)/s;a>1&&(a=1);var i=a*(t-v);return v+i}};
+var Curve = require('./curve');
+var $ = require('jquery-deferred');
+
+module.exports = {
+
+  getMass: function(player, growth) {
+    var level = player.public.level;
+    var mass = Curve.getMass(level);
+    var massTo = Curve.getMass(level + 1);
+    var levelRequirements = Curve.getLevelRequirements(level);
+    var perc = ((player.private.growth || 0) + growth) / levelRequirements;
+    if (perc > 1)
+      perc = 1;
+    var massDiff = perc * (massTo - mass);
+    return mass + massDiff;
+  },
+
+};

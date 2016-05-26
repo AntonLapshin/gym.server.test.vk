@@ -1,1 +1,19 @@
-var GymDb=require("../../gymdb/gymdb"),Db=require("../../db");module.exports={setUp:function(e){GymDb.init().then(e,console.log)},tearDown:function(e){GymDb.close(),e()},get:function(e){var o=Db.getRefs();e.equal(void 0!=o,!0),e.equal(void 0!=o.muscles,!0),e.equal(o.muscles.length,16),e.done()}};
+var GymDb = require('../../gymdb/gymdb'),
+    Db = require('../../db');
+
+module.exports = {
+    setUp: function (callback) {
+        GymDb.init().then(callback, console.log);
+    },
+    tearDown: function (callback) {
+        GymDb.close();
+        callback();
+    },
+    get: function (test) {
+        var references = Db.getRefs();
+        test.equal(references != undefined, true);
+        test.equal(references.muscles != undefined, true);
+        test.equal(references.muscles.length, 16);
+        test.done();
+    }
+};

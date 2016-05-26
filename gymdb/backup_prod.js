@@ -1,1 +1,24 @@
-var GymDb=require("./gymdb"),Db=require("../db"),instances=require("./instances"),fs=require("fs"),PlayersCollection=require("./collections/players");GymDb.init(instances.GYMPRODVK).then(function(){Db.getColl("players").find({$query:{}}).toArray(function(e,n){console.log(n.length),fs.writeFile("players.txt",JSON.stringify(n),function(e){return e?console.log(e):(console.log("The file was saved!"),void GymDb.close())})})},function(e){console.log(e)});
+var GymDb = require('./gymdb');
+var Db = require('../db');
+var instances = require('./instances');
+var fs = require('fs');
+var PlayersCollection = require('./collections/players');
+
+GymDb.init(instances.GYMPRODVK).then(
+    function () {
+      Db.getColl('players').find({$query: {}}).toArray(function(err, data){
+        console.log(data.length);
+        fs.writeFile("players.txt", JSON.stringify(data), function(err) {
+          if(err) {
+            return console.log(err);
+          }
+
+          console.log("The file was saved!");
+          GymDb.close();
+        }); 
+      });
+    },
+    function (err) {
+        console.log(err);
+    });
+
