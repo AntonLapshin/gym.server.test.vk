@@ -280,13 +280,15 @@ function setFrazzle(player, exRef, effect) {
     var s = muscleBody.stress + (muscleExercise.stress < 0.5 ? muscleExercise.stress / 2 : muscleExercise.stress) * effect;
     if (s > 1) s = 1;
 
-    var tdiff = s * 0.03;
-    tdiff = tdiff - tdiff * (tonus[i] / TONUS_MAX);
-    tonus[i] += $.round(tdiff);
-    if (tonus[i] > TONUS_MAX)
-      tonus[i] = TONUS_MAX;
+    var mid = muscleExercise._id;
 
-    player.private.body[muscleExercise._id].frazzle = $.round(f);
-    player.private.body[muscleExercise._id].stress = $.round(s);
+    var tdiff = s * 0.03;
+    tdiff = tdiff - tdiff * (tonus[mid] / TONUS_MAX);
+    tonus[mid] += $.round(tdiff);
+    if (tonus[mid] > TONUS_MAX)
+      tonus[mid] = TONUS_MAX;
+
+    player.private.body[mid].frazzle = $.round(f);
+    player.private.body[mid].stress = $.round(s);
   });
 }
