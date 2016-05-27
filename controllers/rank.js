@@ -96,7 +96,7 @@ module.exports = {
     };
   },
   update: function(player) {
-    var wcPlayer = getCat(player.mass);
+    var wcPlayer = getCat(player.public.mass);
     var wcIndex = WCATS.indexOf(wcPlayer);
     var sum = getSum(player);
     var rank = getRank(wcIndex, sum);
@@ -114,7 +114,7 @@ module.exports = {
   getSum: getSum,
 
   getSalary: function(player) {
-    var wcPlayer = getCat(player.mass);
+    var wcPlayer = getCat(player.public.mass);
     var wcIndex = WCATS.indexOf(wcPlayer);
     var sum = getSum(player);
     var rank = getRank(wcIndex, sum);

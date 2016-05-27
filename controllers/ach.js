@@ -15,6 +15,27 @@ function checkAchGroup(player, ids) {
   return res;
 }
 
+function getPr(player, id) {
+  var exs = player.public.exercises;
+  var e = $.grep(exs, function(e) {
+    return e._id == id;
+  });
+  if (e.length === 0)
+    return null;
+  return e[0].pr;
+}
+
+function checkRank(player, id) {
+  if (!player.public.ranks)
+    return false;
+
+  for (var i = 0; i < player.public.ranks.length; i++) {
+    var r = player.public.ranks[i];
+    if (parseInt(r[1]) >= id)
+      return true;
+  }
+}
+
 var achList = {
 
   // -------------------------------------------------------------------------- Ученик
@@ -24,36 +45,38 @@ var achList = {
 
   // Перейти на страницу к тренеру
   101: function(player, result) {
-    return player.private.coach;
+    return player.private.coach || player.public.level > 0;
   },
 
   // Нанять тренера
   102: function(player, result) {
-    return result.player && result.player.public.coach;
+    return result.player && result.player.public.coach || player.public.level > 0;
   },
 
   // Брусья 1 повтор
   103: function(player, result) {
-    return result.id === 1 && result.fact >= 1 && result.weight >= 0;
+    return result.id === 1 && result.fact >= 1 && result.weight >= 0 || player.public.level > 0;
   },
 
   // Жим 40 кг
   104: function(player, result) {
-    return result.id === 2 && result.fact >= 1 && result.weight >= 40;
+    return result.id === 2 && result.fact >= 1 && result.weight >= 40 || player.public.level > 0;
   },
 
   // Сбор штанги
   105: function(player, result) {
-    return result.job === 'success';
+    return result.job === 'success' || player.public.level > 0;
   },
 
   // Уборка
   106: function(player, result, req) {
-    return player.private.garb === 0;
+    return player.private.garb === 0 || player.public.level > 0;
   },
 
   // Купить еды
   107: function(player, result) {
+    if (player.public.level > 0)
+      return true;
     var p = result.purchase;
     if (!p)
       return false;
@@ -62,6 +85,8 @@ var achList = {
 
   // Отдохнуть
   108: function(player, result) {
+    if (player.public.level > 0)
+      return true;
     var p = result.purchase;
     if (!p)
       return false;
@@ -70,7 +95,7 @@ var achList = {
 
   // Перейти на новый уровень
   109: function(player, result) {
-    return result.levelChange == 1;
+    return result.levelChange == 1 || player.public.level > 0;
   },
 
   // -------------------------------------------------------------------- Новичок
@@ -80,12 +105,12 @@ var achList = {
 
   // Турник
   201: function(player, result) {
-    return result.id === 0 && result.fact >= 1 && result.weight >= 0;
+    return player.public.level > 1 || result.id === 0 && result.fact >= 1 && result.weight >= 0;
   },
 
   // Брусья 2 раза
   202: function(player, result) {
-    return result.id === 1 && result.fact >= 2 && result.weight >= 0;
+    return player.public.level > 1 || result.id === 1 && result.fact >= 2 && result.weight >= 0;
   },
 
   // Купить энергетик
@@ -106,6 +131,8 @@ var achList = {
 
   // Купить причу
   205: function(player, result) {
+    if (player.public.hss && player.public.hss.length > 0)
+      return true;
     var p = result.purchase;
     if (!p)
       return false;
@@ -114,6 +141,8 @@ var achList = {
 
   // Купить очки
   206: function(player, result) {
+    if (player.public.gls && player.public.gls.length > 0)
+      return true;
     var p = result.purchase;
     if (!p)
       return false;
@@ -122,6 +151,8 @@ var achList = {
 
   // Купить бороду
   207: function(player, result) {
+    if (player.public.bds && player.public.bds.length > 0)
+      return true;
     var p = result.purchase;
     if (!p)
       return false;
@@ -140,7 +171,7 @@ var achList = {
 
   // Брусья 5 раз
   301: function(player, result) {
-    return result.id === 1 && result.fact >= 5 && result.weight >= 0;
+    return player.public.level > 5 || result.id === 1 && result.fact >= 5 && result.weight >= 0;
   },
 
   // Купить креатин
@@ -161,6 +192,8 @@ var achList = {
 
   // Купить шорты
   304: function(player, result) {
+    if (player.public.shs && player.public.shs.length > 0)
+      return true;
     var p = result.purchase;
     if (!p)
       return false;
@@ -169,6 +202,8 @@ var achList = {
 
   // Купить майку
   305: function(player, result) {
+    if (player.public.tss && player.public.tss.length > 0)
+      return true;
     var p = result.purchase;
     if (!p)
       return false;
@@ -177,6 +212,8 @@ var achList = {
 
   // Купить кросы
   306: function(player, result) {
+    if (player.public.sns && player.public.sns.length > 0)
+      return true;
     var p = result.purchase;
     if (!p)
       return false;
@@ -185,6 +222,8 @@ var achList = {
 
   // 3 разряд
   307: function(player, result) {
+    if (checkRank(player, 0))
+      return true;
     return result.rank >= 0;
   },
 
@@ -232,6 +271,8 @@ var achList = {
 
   // 1 разряд
   406: function(player, result) {
+    if (checkRank(player, 2))
+      return true;
     return result.rank >= 2;
   },
 
@@ -257,7 +298,7 @@ var achList = {
 
   // 20 учеников
   504: function(player, result) {
-    return player.public.coach && player.public.coach.q > 20;
+    return player.public.coach && player.public.coach.q >= 20;
   },
 
   // Пригласить 12
@@ -267,6 +308,8 @@ var achList = {
 
   // КМС
   506: function(player, result) {
+    if (checkRank(player, 3))
+      return true;
     return result.rank >= 3;
   },
 
@@ -292,7 +335,7 @@ var achList = {
 
   // 40 учеников
   604: function(player, result) {
-    return player.public.coach && player.public.coach.q > 40;
+    return player.public.coach && player.public.coach.q >= 40;
   },
 
   // Пригласить 15
@@ -302,6 +345,8 @@ var achList = {
 
   // МС
   606: function(player, result) {
+    if (checkRank(player, 4))
+      return true;
     return result.rank >= 4;
   },
 
@@ -327,7 +372,7 @@ var achList = {
 
   // 70 учеников
   704: function(player, result) {
-    return player.public.coach && player.public.coach.q > 70;
+    return player.public.coach && player.public.coach.q >= 70;
   },
 
   // Пригласить 20
@@ -337,6 +382,8 @@ var achList = {
 
   // МСМК
   706: function(player, result) {
+    if (checkRank(player, 5))
+      return true;
     return result.rank >= 5;
   },
 
@@ -481,101 +528,161 @@ var achList = {
 
   // Становая тяга 180 кг на 1 раз
   1001: function(player, result) {
+    var pr = getPr(player, 4);
+    if (pr && pr >= 180)
+      return true;
     return result.id === 4 && result.fact >= 1 && result.weight >= 180;
   },
 
   // Подъем на бицепс 60 кг на 1 раз
-  1001: function(player, result) {
+  1002: function(player, result) {
+    var pr = getPr(player, 6);
+    if (pr && pr >= 60)
+      return true;
     return result.id === 6 && result.fact >= 1 && result.weight >= 60;
   },
 
   // Шраги 120 кг на 1 раз
   1003: function(player, result) {
+    var pr = getPr(player, 7);
+    if (pr && pr >= 120)
+      return true;
     return result.id === 7 && result.fact >= 1 && result.weight >= 120;
   },
 
   // Сделать тягу к поясу 110 кг на 1 раз
   1004: function(player, result) {
+    var pr = getPr(player, 5);
+    if (pr && pr >= 110)
+      return true;
     return result.id === 5 && result.fact >= 1 && result.weight >= 110;
   },
 
   // Подтянуться с весом 100 раз 
   1005: function(player, result) {
+    var pr = getPr(player, 0);
+    if (pr && pr >= 100)
+      return true;
     return result.id === 0 && result.fact >= 1 && result.weight >= 100;
   },
 
   // Отжаться на брусьях с весом 100 раз
   1006: function(player, result) {
+    var pr = getPr(player, 1);
+    if (pr && pr >= 100)
+      return true;
     return result.id === 1 && result.fact >= 1 && result.weight >= 100;
   },
 
   // Жим лежа 170 кг на 1 раз
   1007: function(player, result) {
+    var pr = getPr(player, 2);
+    if (pr && pr >= 170)
+      return true;
     return result.id === 2 && result.fact >= 1 && result.weight >= 170;
   },
 
   // Приседания со штангой 250 кг на 1 раз
   1008: function(player, result) {
+    var pr = getPr(player, 3);
+    if (pr && pr >= 250)
+      return true;
     return result.id === 3 && result.fact >= 1 && result.weight >= 250;
   },
 
   // Становая тяга 280 кг на 1 раз
   1009: function(player, result) {
+    var pr = getPr(player, 4);
+    if (pr && pr >= 280)
+      return true;
     return result.id === 4 && result.fact >= 1 && result.weight >= 280;
   },
 
   // Подъем на бицепс 120 кг на 1 раз
   1010: function(player, result) {
+    var pr = getPr(player, 6);
+    if (pr && pr >= 120)
+      return true;
     return result.id === 6 && result.fact >= 1 && result.weight >= 120;
   },
 
   // Шраги 200 кг на 1 раз
   1011: function(player, result) {
+    var pr = getPr(player, 7);
+    if (pr && pr >= 200)
+      return true;
     return result.id === 7 && result.fact >= 1 && result.weight >= 200;
   },
 
   // Сделать тягу к поясу 150 кг на 1 раз
   1012: function(player, result) {
+    var pr = getPr(player, 5);
+    if (pr && pr >= 150)
+      return true;
     return result.id === 5 && result.fact >= 1 && result.weight >= 150;
   },
 
   // Подтянуться с весом 160 раз 
   1013: function(player, result) {
+    var pr = getPr(player, 0);
+    if (pr && pr >= 160)
+      return true;
     return result.id === 0 && result.fact >= 1 && result.weight >= 160;
   },
 
   // Отжаться на брусьях с весом 160 раз
   1014: function(player, result) {
+    var pr = getPr(player, 1);
+    if (pr && pr >= 160)
+      return true;
     return result.id === 1 && result.fact >= 1 && result.weight >= 160;
   },
 
   // Жим лежа 230 кг на 1 раз
   1015: function(player, result) {
+    var pr = getPr(player, 2);
+    if (pr && pr >= 230)
+      return true;
     return result.id === 2 && result.fact >= 1 && result.weight >= 230;
   },
 
   // Приседания со штангой 360 кг на 1 раз
   1016: function(player, result) {
+    var pr = getPr(player, 3);
+    if (pr && pr >= 360)
+      return true;
     return result.id === 3 && result.fact >= 1 && result.weight >= 260;
   },
 
   // Становая тяга 390 кг на 1 раз
   1017: function(player, result) {
+    var pr = getPr(player, 4);
+    if (pr && pr >= 390)
+      return true;
     return result.id === 4 && result.fact >= 1 && result.weight >= 390;
   },
 
   // Подъем на бицепс 180 кг на 1 раз
   1018: function(player, result) {
+    var pr = getPr(player, 6);
+    if (pr && pr >= 180)
+      return true;
     return result.id === 6 && result.fact >= 1 && result.weight >= 180;
   },
 
   // Шраги 330 кг на 1 раз
   1019: function(player, result) {
+    var pr = getPr(player, 7);
+    if (pr && pr >= 330)
+      return true;
     return result.id === 7 && result.fact >= 1 && result.weight >= 330;
   },
 
   // Сделать тягу к поясу 220 кг на 1 раз
   1020: function(player, result) {
+    var pr = getPr(player, 5);
+    if (pr && pr >= 220)
+      return true;
     return result.id === 5 && result.fact >= 1 && result.weight >= 220;
   }
 
@@ -635,12 +742,16 @@ module.exports = {
         if (!noPrize) {
           if (a.prize.money) {
             player.private.money += a.prize.money;
-            result.money = a.prize.money;
+            if (!result.money)
+              result.money = 0;
+            result.money += a.prize.money;
           }
 
           if (a.prize.gold) {
             player.private.gold += a.prize.gold;
-            result.gold = a.prize.gold;
+            if (!result.gold)
+              result.gold = 0;
+            result.gold += a.prize.gold;
           }
 
           if (a.prize.type === 'exercises') {

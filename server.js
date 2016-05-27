@@ -21,7 +21,7 @@ function reloadSession(req) {
   return defer;
 }
 
-function handler(req, res, route) {
+function handler(req, res, route, routeName) {
 
   function rejectHandler(err) {
     var message = err.message || err;
@@ -68,7 +68,8 @@ function handler(req, res, route) {
       var params = getParams(req, method);
       method.handler(session, params)
         .then(function(result) {
-          require('./controllers/ach').handler(session, result, req);
+          if (routeName !== 'refs')
+            require('./controllers/ach').handler(session, result, req);
           if (session.isDirty) {
             session.isDirty = false;
 
@@ -135,7 +136,7 @@ exports.start = function(port) {
         routes.forEach(function(routeName) {
           var route = require('./routes/' + routeName);
           app.get('/' + routeName, function(req, res) {
-            handler(req, res, route);
+            handler(req, res, route, routeName);
           });
         });
 
