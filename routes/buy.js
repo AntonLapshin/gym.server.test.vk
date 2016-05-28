@@ -1,5 +1,6 @@
-var Db = require('../db'),
-  $ = require('jquery-deferred');
+var Db = require('../db');
+var $ = require('jquery-deferred');
+var Purchase = require('../controllers/purchase');
 
 module.exports = {
   default: {
@@ -55,15 +56,7 @@ module.exports = {
       }
       answer.success = answer.purchase.success = true;
 
-      if (type === 'exercises') {
-        session.player.public.exercises.push({
-          _id: id
-        });
-      } else if (type === 'hs' || type === 'bd' || type === 'gl' || type === 'sh') {
-        add(session, type, id);
-      } else {
-        session.player.private[type].push(id);
-      }
+      Purchase.go(session, type, id, answer);
 
       session.isDirty = true;
       defer.resolve(answer);
@@ -72,12 +65,3 @@ module.exports = {
     }
   }
 };
-
-function add(session, type, id) {
-  session.player.public[type] = id;
-  if (!session.player.public[type + 's']) {
-    session.player.public[type + 's'] = [];
-  }
-  if (session.player.public[type + 's'].indexOf(id) == -1)
-    session.player.public[type + 's'].push(id);
-}
