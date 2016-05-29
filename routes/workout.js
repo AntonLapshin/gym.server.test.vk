@@ -16,7 +16,6 @@ module.exports = {
 
   getTotalWeightMax: function(player, id) {
     var level = player.public.level;
-    var body = player.private.body;
     var tonus = player.private.tonus;
     var exRef = Db.getRefs().exercises[id];
 
@@ -29,12 +28,11 @@ module.exports = {
     var totalMt = 0;
     for (var i = 0; i < exRef.body.length; i++) {
       var muscleEx = exRef.body[i];
-      var muscleBody = body[muscleEx._id];
       var muscleRef = Db.getRefs().muscles[muscleEx._id];
       var muscleTonus = tonus ? tonus[muscleEx._id] : 0;
 
       var m = muscleRef.power * muscleEx.stress;
-      var mf = m * muscleBody.frazzle;
+      var mf = m * player.private.frazzle[muscleEx._id];
       var mt = m * muscleTonus;
 
       totalM += m;
@@ -93,21 +91,25 @@ module.exports = {
       };
       var percent = player.private.energy / player.private.energyMax;
       eff = percent * eff;
-      var tonus = getTonus(player);
-      player.private.body.forEach(function(m, i) {
-        m.frazzle += $.round(eff);
-        m.stress += $.round(eff);
-        if (m.frazzle > 1)
-          m.frazzle = 1;
-        if (m.stress > 1)
-          m.stress = 1;
 
+      var frazzle = player.private.frazzle;
+      var stress = player.private.stress;
+      var tonus = player.private.tonus;
+
+      for (var i = 0; i <= 15; i++) {
+        frazzle[i] += $.round(eff);
+        stress[i] += $.round(eff);
+        if (frazzle[i] > 1)
+          frazzle[i] = 1;
+        if (stress[i] > 1)
+          stress[i] = 1;
         var tdiff = eff * 0.015;
         tdiff = tdiff - tdiff * (tonus[i] / TONUS_MAX);
         tonus[i] += $.round(tdiff);
         if (tonus[i] > TONUS_MAX)
           tonus[i] = TONUS_MAX;
-      });
+      }
+
       session.isDirty = true;
       answer.effect = eff;
       answer.energy = -player.private.energy;
@@ -261,23 +263,15 @@ module.exports = {
   }
 };
 
-function getTonus(player) {
-  if (!player.private.tonus) {
-    player.private.tonus = [];
-    for (var i = 0; i < 16; i++) {
-      player.private.tonus.push(0);
-    }
-  }
-  return player.private.tonus;
-}
-
 function setFrazzle(player, exRef, effect) {
-  var tonus = getTonus(player);
+  var frazzle = player.private.frazzle;
+  var stress = player.private.stress;
+  var tonus = player.private.tonus;
   exRef.body.forEach(function(muscleExercise, i) {
-    var muscleBody = player.private.body[muscleExercise._id];
-    var f = muscleBody.frazzle + muscleExercise.stress * effect;
+
+    var f = frazzle[muscleExercise._id] + muscleExercise.stress * effect;
     if (f > 1) f = 1;
-    var s = muscleBody.stress + (muscleExercise.stress < 0.5 ? muscleExercise.stress / 2 : muscleExercise.stress) * effect;
+    var s = stress[muscleExercise._id] + (muscleExercise.stress < 0.5 ? muscleExercise.stress / 2 : muscleExercise.stress) * effect;
     if (s > 1) s = 1;
 
     var mid = muscleExercise._id;
@@ -288,7 +282,7 @@ function setFrazzle(player, exRef, effect) {
     if (tonus[mid] > TONUS_MAX)
       tonus[mid] = TONUS_MAX;
 
-    player.private.body[mid].frazzle = $.round(f);
-    player.private.body[mid].stress = $.round(s);
+    frazzle[mid] = $.round(f);
+    stress[mid] = $.round(s);
   });
 }

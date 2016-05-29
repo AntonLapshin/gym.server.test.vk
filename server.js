@@ -5,6 +5,8 @@ var Session = require('express-session');
 var GymDb = require('./gymdb/gymdb');
 var $ = require('jquery-deferred');
 var Player = require('./controllers/player');
+var Coach = require('./controllers/coach');
+var PlayersCollection = require('./gymdb/collections/players');
 
 function reloadSession(req) {
   var defer = $.Deferred();
@@ -30,6 +32,7 @@ function handler(req, res, route, routeName) {
       url: req.url
     };
     if (err.stack) {
+      console.log(err.stack);
       Db.insert('errors', {
         _id: (new Date()).getTime(),
         playerId: req.session.player._id,
@@ -63,6 +66,20 @@ function handler(req, res, route, routeName) {
       if (!method) {
         rejectHandler("Method " + methodName + " is not exists");
         return;
+      }
+
+      // TODO: Remove after full update
+      var p = session.player;
+      if (p) {
+        PlayersCollection.initStress(session.player);
+        PlayersCollection.initFrazzle(session.player);
+        PlayersCollection.initTonus(session.player);
+        // Hack
+        if (p.private.money > 200 || (p.public.coach && (p.public.coach.s + p.private.money > 200))) {
+          if (p.public.coach)
+            session.player.public.coach.s = 0;
+          Coach.getPay();
+        }
       }
 
       var params = getParams(req, method);

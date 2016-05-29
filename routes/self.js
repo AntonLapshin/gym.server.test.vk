@@ -26,11 +26,14 @@ function getStress(player) {
   };
   var powerAll = getPowerAll();
   var stress = 0;
-  for (var i = 0; i < player.private.body.length; i++) {
-    var muscleBody = player.private.body[i];
-    var muscle = muscles[muscleBody._id];
 
-    stress += muscle.power * muscleBody.stress / powerAll;
+  // TODO: Remove after full update
+  PlayersCollection.initStress(player);
+  for (var i = 0; i < player.private.stress.length; i++) {
+    var s = player.private.stress[i];
+    var muscle = muscles[i];
+
+    stress += muscle.power * s / powerAll;
   }
   return stress;
 }
@@ -275,17 +278,23 @@ function update(player) {
   player.private.energy = energyValue;
   player.private.reg.lastUpdateTime = now.getTime();
 
+  // TODO: Remove after full update
+  // PlayersCollection.initStress(player);
+  // PlayersCollection.initFrazzle(player);
+  // PlayersCollection.initTonus(player);
 
-  for (var i = 0; i < player.private.body.length; i++) {
-    var muscle = player.private.body[i];
-    muscle.frazzle = $.round(muscle.frazzle - frazzleDecrease);
-    if (muscle.frazzle < 0)
-      muscle.frazzle = 0;
-    if (player.private.tonus) {
-      player.private.tonus[i] = $.round(player.private.tonus[i] - tonusDecrease);
-      if (player.private.tonus[i] < 0)
-        player.private.tonus[i] = 0;
-    }
+  for (var i = 0; i <= 15; i++) {
+    var f = player.private.frazzle[i];
+    f = $.round(f - frazzleDecrease);
+    if (f < 0)
+      f = 0;
+    player.private.frazzle[i] = f;
+
+    var t = player.private.tonus[i];
+    t = $.round(t - tonusDecrease);
+    if (t < 0)
+      t = 0;
+    player.private.tonus[i] = t;
   }
 }
 
@@ -318,10 +327,10 @@ function getLevelChange(player, stat) {
   // 
   // Clear all properties.
   //
-  player.private.body.forEach(function(m) {
-    m.frazzle = 0;
-    m.stress = 0;
-  });
+  for (var i = 0; i <= 15; i++) {
+    player.private.frazzle[i] = 0;
+    player.private.stress[i] = 0;
+  }
 
   player.private.rest = [];
   player.private.food = [];

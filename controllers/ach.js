@@ -45,12 +45,12 @@ var achList = {
 
   // Перейти на страницу к тренеру
   101: function(player, result) {
-    return player.private.coach || player.public.level > 0;
+    return result.player && result.player.public.coach || player.public.level > 0;
   },
 
   // Нанять тренера
   102: function(player, result) {
-    return result.player && result.player.public.coach || player.public.level > 0;
+    return player.private.coach || player.public.level > 0;
   },
 
   // Брусья 1 повтор
@@ -362,7 +362,7 @@ var achList = {
 
   // Бицепс 90 кг 20 раз
   702: function(player, result) {
-    return result.id === 7 && result.fact >= 20 && result.weight >= 90;
+    return result.id === 6 && result.fact >= 20 && result.weight >= 90;
   },
 
   // Брусья 75 кг 15 раз
@@ -394,69 +394,69 @@ var achList = {
 
   // Шея 100%
   801: function(player, result) {
-    return player.private.body[0].stress == 1;
+    return player.private.stress[0] == 1;
   },
 
   // Трапы 100%
   802: function(player, result) {
-    return player.private.body[1].stress == 1;
+    return player.private.stress[1] == 1;
   },
 
   // Дельты 100%
   803: function(player, result) {
-    return player.private.body[2].stress == 1;
+    return player.private.stress[2] == 1;
   },
 
   // Бицепс 100%
   804: function(player, result) {
-    return player.private.body[3].stress == 1;
+    return player.private.stress[3] == 1;
   },
 
   // Трицепс 100%
   805: function(player, result) {
-    return player.private.body[4].stress == 1;
+    return player.private.stress[4] == 1;
   },
 
   // Предплечье 100%
   806: function(player, result) {
-    return player.private.body[5].stress == 1;
+    return player.private.stress[5] == 1;
   },
 
   // Грудь 100%
   807: function(player, result) {
-    return player.private.body[6].stress == 1;
+    return player.private.stress[6] == 1;
   },
 
   // Косые 100%
   808: function(player, result) {
-    return player.private.body[7].stress == 1;
+    return player.private.stress[7] == 1;
   },
 
   // Прямые 100%
   809: function(player, result) {
-    return player.private.body[8].stress == 1;
+    return player.private.stress[8] == 1;
   },
 
   // Круглые 100%
   810: function(player, result) {
-    return player.private.body[9].stress == 1;
+    return player.private.stress[9] == 1;
   },
 
   // Широчайшие 100%
   811: function(player, result) {
-    return player.private.body[10].stress == 1;
+    return player.private.stress[10] == 1;
   },
 
   // Квадрицепс 100%
   812: function(player, result) {
-    return player.private.body[13].stress == 1;
+    return player.private.stress[13] == 1;
   },
 
   // Все мышцы 100%
   813: function(player) {
     var isCompleted = true;
-    player.private.body.forEach(function(m) {
-      if (m.stress != 1) {
+    player.private.stress.forEach(function(s) {
+      if (s != 1) {
         isCompleted = false;
         return false;
       }
