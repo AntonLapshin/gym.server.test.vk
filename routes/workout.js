@@ -103,7 +103,7 @@ module.exports = {
           frazzle[i] = 1;
         if (stress[i] > 1)
           stress[i] = 1;
-        var tdiff = eff * 0.015;
+        var tdiff = eff * 0.01;
         tdiff = tdiff - tdiff * (tonus[i] / TONUS_MAX);
         tonus[i] += $.round(tdiff);
         if (tonus[i] > TONUS_MAX)
@@ -271,12 +271,12 @@ function setFrazzle(player, exRef, effect) {
 
     var f = frazzle[muscleExercise._id] + muscleExercise.stress * effect;
     if (f > 1) f = 1;
-    var s = stress[muscleExercise._id] + (muscleExercise.stress < 0.5 ? muscleExercise.stress / 2 : muscleExercise.stress) * effect;
+    var s = stress[muscleExercise._id] + (muscleExercise.stress < 0.5 ? muscleExercise.stress / 5 : muscleExercise.stress) * effect;
     if (s > 1) s = 1;
 
     var mid = muscleExercise._id;
 
-    var tdiff = s * 0.03;
+    var tdiff = s * 0.025;
     tdiff = tdiff - tdiff * (tonus[mid] / TONUS_MAX);
     tonus[mid] += $.round(tdiff);
     if (tonus[mid] > TONUS_MAX)
