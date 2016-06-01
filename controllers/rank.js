@@ -111,6 +111,13 @@ module.exports = {
     }
   },
 
+  getRank: function(player) {
+    var wcPlayer = getCat(player.public.mass);
+    var wcIndex = WCATS.indexOf(wcPlayer);
+    var sum = getSum(player);
+    return getRank(wcIndex, sum);
+  },
+
   getSum: getSum,
 
   getSalary: function(player) {

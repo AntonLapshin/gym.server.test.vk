@@ -183,6 +183,25 @@ module.exports = {
             player.private.gold += salary.gold;
           }
         }
+
+        if (player.public.coach) {
+          var q = player.public.coach.q;
+
+          var levelCoeff = player.public.level / 67 * 10;
+          var rankCoeff = (Rank.getRank(player) || 0) * 2;
+          var rating = Math.floor((levelCoeff + rankCoeff + 1) / 5);
+
+          var maxQ = 10 * rating;
+          if (maxQ === 0)
+            maxQ = 5;
+          if (q > maxQ)
+            q = maxQ;
+
+          if (!result.money)
+            result.money = 0;
+          result.money += q;
+          player.private.money += q;
+        }
       }
 
       update(player);

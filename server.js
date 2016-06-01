@@ -74,12 +74,6 @@ function handler(req, res, route, routeName) {
         PlayersCollection.initStress(session.player);
         PlayersCollection.initFrazzle(session.player);
         PlayersCollection.initTonus(session.player);
-        // Hack
-        if (p.private.money > 200 || (p.public.coach && (p.public.coach.s + p.private.money > 200))) {
-          if (p.public.coach)
-            session.player.public.coach.s = 0;
-          Coach.getPay();
-        }
       }
 
       var params = getParams(req, method);
