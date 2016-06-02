@@ -20,7 +20,7 @@ module.exports = {
         success: true
       };
 
-      if (type === 'hs' || type === 'bd' || type === 'gl' || type === 'sh' || type === 'ts') {
+      if (type === 'hs' || type === 'bd' || type === 'gl' || type === 'sh' || type === 'ts' || type === 'sn') {
         var result = set(session, type, id);
         if (!result) {
           answer.success = false;
