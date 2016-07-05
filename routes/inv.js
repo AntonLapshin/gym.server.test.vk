@@ -66,7 +66,7 @@ module.exports = {
 
 function set(session, type, id) {
   var storage = session.player.public[type + 's']
-  if (!storage || storage.indexOf(id) == -1) {
+  if (!storage || (storage.indexOf(id) == -1 && id != 0)) {
     return false;
   }
   session.player.public[type] = id;
