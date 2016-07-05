@@ -33,6 +33,34 @@ module.exports = {
 
       return defer;
     }
+  },
+  bulk: {
+    params: {
+      statement: {
+        required: true,
+      }
+    },
+    handler: function(session, params) {
+      var statement = params.statement;
+
+      var pairs = statement.split(',');
+      for (var i = 0; i < pairs.length; i++) {
+        var pair = pairs[i].split('=');
+        var type = pair[0];
+        var id = pair[1];
+        set(session, type, id);
+      }
+
+      var answer = {
+        success: true
+      };
+
+      var defer = $.Deferred();
+
+      defer.resolve(answer);
+
+      return defer;
+    }
   }
 };
 
