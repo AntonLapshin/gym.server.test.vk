@@ -65,7 +65,8 @@ module.exports = {
 };
 
 function set(session, type, id) {
-  var storage = session.player.public[type + 's']
+  var storage = session.player.public[type + 's'];
+  id = parseInt(id);
   if (!storage || (storage.indexOf(id) == -1 && id != 0)) {
     return false;
   }

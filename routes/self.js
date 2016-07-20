@@ -187,8 +187,8 @@ module.exports = {
         if (player.public.coach) {
           var q = player.public.coach.q;
 
-          var levelCoeff = player.public.level / 67 * 10;
-          var rankCoeff = (Rank.getRank(player) || 0) * 2;
+          var levelCoeff = player.public.level / 50 * 10;
+          var rankCoeff = (Rank.getRank(player) || 0) * 2 + 1;
           var rating = Math.floor((levelCoeff + rankCoeff + 1) / 5);
 
           var maxQ = 10 * rating;
