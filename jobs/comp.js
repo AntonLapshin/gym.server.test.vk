@@ -100,6 +100,7 @@ module.exports = {
 
   run: function() {
 
+    console.log('************* Comp Job is running ************');
     for (var wcat = 0; wcat < GLOBAL.GYM.COMPS.length; wcat++) {
 
       var comps = getComp(wcat).comps;

@@ -6,13 +6,13 @@ var comps = [
 function getComp(id, disabled) {
   return {
     _id: id,
-    uid: 0,
-    status: 0, // 0 - inactive, 1 - active
+    uid: (new Date()).getTime(),
+    status: disabled ? 0 : 1, // 0 - inactive, 1 - active
     res: [],
     q: 0,
     disabled: disabled,
     members: [],
-    last: 0
+    last: (new Date()).getTime()
   };
 }
 
