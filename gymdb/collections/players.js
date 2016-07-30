@@ -83,6 +83,12 @@ exports.initTonus = function(p) {
   }
 };
 
+exports.initAwards = function(p) {
+  if (p.public.awards)
+    return;
+  p.public.awards = [];
+};
+
 var CollinMartie = exports.newPlayer(254444141, 29, true);
 
 exports.players = [

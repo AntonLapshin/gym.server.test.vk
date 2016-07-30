@@ -155,7 +155,7 @@ module.exports = {
 
       Workout.execute.handler(session, params).then(function(res) {
 
-        if (res.fact >= -1) {
+        if (res.fact >= 1) {
           compPower.attempts.push(params.weight);
           if (index === 8) {
             // Calc sum

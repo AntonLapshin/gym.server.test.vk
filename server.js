@@ -89,6 +89,7 @@ function handler(req, res, route, routeName) {
         PlayersCollection.initStress(session.player);
         PlayersCollection.initFrazzle(session.player);
         PlayersCollection.initTonus(session.player);
+        PlayersCollection.initAwards(session.player);
       }
 
       var params = getParams(req, method);

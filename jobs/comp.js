@@ -133,9 +133,9 @@ module.exports = {
           continue;
 
         var players = comp.members.sort(function(a, b) {
-          var res = a.sum - b.sum;
+          var res = b.sum - a.sum;
           if (res === 0)
-            res = b.mass - a.mass;
+            res = a.mass - b.mass;
           return res;
         });
 
