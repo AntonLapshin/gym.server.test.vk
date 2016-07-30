@@ -189,7 +189,7 @@ module.exports = {
           var p = {
             "id": player._id,
             "sum": sum,
-            "mass": player.public.mass
+            "mass": player.public.mass || 45
           };
 
           GLOBAL.GYM.COMPS[wcat].comps[0].members.push(p);
