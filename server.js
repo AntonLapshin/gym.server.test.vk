@@ -17,6 +17,21 @@ function reloadSession(req) {
   }
 
   req.session.reload(function() {
+    //
+    // Force update when needed
+    //
+    var id = req.session.player._id;
+    if (GLOBAL.GYM.force[id]) {
+      GLOBAL.GYM.force[id] = false;
+      require('./routes/auth').default.handler(req.session, {
+        playerId: id,
+        authKey: 123,
+        force: true
+      }).then(function() {
+        defer.resolve();
+      });
+      return;
+    }
     defer.resolve();
   });
 
@@ -77,7 +92,7 @@ function handler(req, res, route, routeName) {
       }
 
       var params = getParams(req, method);
-      method.handler(session, params)
+      method.handler(session, params, req)
         .then(function(result) {
           if (routeName !== 'refs')
             require('./controllers/ach').handler(session, result, req);
@@ -150,6 +165,12 @@ exports.start = function(port) {
             handler(req, res, route, routeName);
           });
         });
+
+        for (var jobName in GLOBAL.GYM.JOBS) {
+          var job = require('./jobs/' + jobName);
+          job.init();
+          setInterval(job.run, GLOBAL.GYM.JOBS[jobName]);
+        }
 
         app.listen(port);
         defer.resolve();

@@ -9,6 +9,11 @@ var CURVES = {
   dose: '(0,1)(55,5)',
 
   //
+  // x = members, y = delay in minutes
+  //
+  compMembersDelay: '(0,1000)(5,100)(10,50)(30,30)(50,20)(100,10)(200,5)(500,5)(1000,5)',
+
+  //
   // x = percent, y = effect
   //
   doseEffect: '(0,0)(0.5,0.7)(0.75, 0.9)(0.875, 0.95)',
@@ -207,6 +212,10 @@ module.exports = {
 
   getFoodProfit: function(type, percent) {
     return getValue(CURVES[type], percent);
+  },
+
+  getCompDelay: function(members) {
+    return getValue(CURVES.compMembersDelay, members);
   },
 
 };

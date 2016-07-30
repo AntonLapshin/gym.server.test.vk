@@ -12,14 +12,15 @@ module.exports = {
       },
       authKey: {
         required: true
-      }
+      },
+      force: {}
     },
     handler: function(session, params) {
       var defer = $.Deferred();
 
       var playerId = params.playerId;
 
-      if (playerId !== 5653333) {
+      if (playerId !== 5653333 && !params.force) {
         var data = GLOBAL.GYM.VK_APP_ID + '_' + playerId + '_' + GLOBAL.GYM.VK_APP_SECRET;
         var crypto = require('crypto');
         var expectedAuthKey = crypto.createHash('md5').update(data).digest('hex');
