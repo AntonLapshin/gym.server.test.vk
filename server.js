@@ -153,7 +153,7 @@ exports.start = function(port) {
     secret: 'iuBviX21'
   }));
 
-  var routes = ['auth', 'refs', 'workout', 'job', 'self', 'top', 'coach', 'buy', 'real', 'god', 'payment', 'inv', 'error'];
+  var routes = ['auth', 'refs', 'workout', 'job', 'self', 'top', 'coach', 'buy', 'real', 'god', 'payment', 'inv', 'error', 'comp'];
 
   return $.Deferred(function(defer) {
     try {
