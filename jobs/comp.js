@@ -1,17 +1,6 @@
 var Db = require('../db');
 var $ = require('jquery-deferred');
 var Curve = require('../controllers/curve');
-// var Coach = require('../controllers/coach');
-// var Rank = require('../controllers/rank');
-// var Stimul = require('../controllers/stimul');
-// var Workout = require('./workout');
-
-// var WEIGHT_MIN = 0;
-// var REPEATS_MIN = 0;
-// var REPEATS_MAX = 200;
-// var COEFF_POWER = 7;
-// var COEFF_FRAZZLE = 10;
-// var TONUS_MAX = 10;
 
 var FUND_LEVELS = [{
   id: 0,

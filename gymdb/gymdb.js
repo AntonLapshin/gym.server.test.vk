@@ -1,7 +1,7 @@
 var Db = require('../db');
 var $ = require('jquery-deferred');
 
-var COLL_NAMES = ['exercises', 'gyms', 'muscles', 'players', 'achievements', 'shop', 'coaches', 'errors'],
+var COLL_NAMES = ['exercises', 'gyms', 'muscles', 'players', 'achievements', 'shop', 'coaches', 'errors', 'comp'],
   REF_NAMES = ['exercises', 'gyms', 'muscles', 'achievements', 'shop'],
   INDEX = {
     'players': {
