@@ -140,10 +140,14 @@ module.exports = {
       repeats: {
         required: true,
         parseMethod: parseInt
+      },
+      comp: {
+        parseMethod: parseInt
       }
     },
     handler: function(session, params) {
       var player = session.player;
+      var comp = params.comp;
       var gymId = params.gymId;
       var exerciseId = params.exerciseId;
       var weight = params.weight;
@@ -152,14 +156,14 @@ module.exports = {
       var defer = $.Deferred();
 
       var gymRef = Db.getRefs().gyms[gymId];
-      if (gymRef.exercises.indexOf(exerciseId) == -1) {
+      if (!comp && gymRef.exercises.indexOf(exerciseId) == -1) {
         defer.reject('MES_EXERCISE');
         return defer;
       }
       var playerEx = $.grep(player.public.exercises, function(ex) {
         return ex._id === exerciseId;
       });
-      if (playerEx.length === 0) {
+      if (!comp && playerEx.length === 0) {
         defer.reject('MES_EXERCISE');
         return defer;
       }
@@ -168,15 +172,15 @@ module.exports = {
       var exRef = Db.getRefs().exercises[exerciseId];
       var maxWeight = exRef.max * gymRef.weight;
 
-      if (weight < WEIGHT_MIN || maxWeight < weight) {
+      if (!comp && (weight < WEIGHT_MIN || maxWeight < weight)) {
         defer.reject('MES_WEIGHT');
         return defer;
       }
-      if (repeats < REPEATS_MIN) {
+      if (!comp && repeats < REPEATS_MIN) {
         defer.reject('MES_REPEATS_MIN');
         return defer;
       }
-      if (repeats > REPEATS_MAX) {
+      if (!comp && repeats > REPEATS_MAX) {
         defer.reject('MES_REPEATS_MAX');
         return defer;
       }
@@ -220,7 +224,7 @@ module.exports = {
       answer.fact = meta.repeatsMax;
       answer.energy = -energyFact;
 
-      if (repeatsFact >= 1) {
+      if (playerEx && repeatsFact >= 1) {
         // Personal Record
         var pr = playerEx.pr || 0;
         if (weight > pr) {

@@ -37,6 +37,13 @@ function getCat(weight) {
   })[0];
 }
 
+function getCatIndex(weight) {
+  for (var i = 0; i < WCATS.length; i++) {
+    if (WCATS[i] > weight)
+      return i;
+  }
+}
+
 function getRank(wcatIndex, sum) {
   if (!T[wcatIndex]) // TODO: bug fix
     return null;
@@ -88,6 +95,8 @@ function getSum(player) {
 }
 
 module.exports = {
+  getCat: getCat,
+  getCatIndex: getCatIndex,
   getCatData: function(cat) {
     var i = WCATS.indexOf(cat);
     return {
