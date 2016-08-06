@@ -162,6 +162,9 @@ module.exports = {
           var setClause = {};
           setClause[clause + "place"] = place;
           setClause[clause + "status"] = 'results';
+          if (place <= 3) {
+            setClause[clause + "award"] = "{0}-{1}-{2}-{3}-{4}".f(place, c.q, wcat, sum, i);
+          }
 
           if (gold)
             setClause[clause + "gold"] = gold;

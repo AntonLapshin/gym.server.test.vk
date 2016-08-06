@@ -65,6 +65,7 @@ module.exports = {
       var comps = player.public.comp;
       var gold = 0;
       var money = 0;
+      var awards = [];
       for (var name in comps) {
         var c = comps[name];
         if (c.status !== 'results')
@@ -73,6 +74,10 @@ module.exports = {
         c.status = 'end';
         gold += c.gold || 0;
         money += c.money || 0;
+        if (c.award) {
+          player.public.awards.push(c.award);
+          awards.push(c.award);
+        }
         session.isDirty = true;
       }
 
@@ -89,6 +94,9 @@ module.exports = {
         player.private.money += money;
         result.money = money;
       }
+
+      if (awards.length > 0)
+        result.awards = awards;
 
       var defer = $.Deferred();
 
