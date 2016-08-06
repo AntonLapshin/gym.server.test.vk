@@ -163,7 +163,7 @@ module.exports = {
           setClause[clause + "place"] = place;
           setClause[clause + "status"] = 'results';
           if (place <= 3) {
-            setClause[clause + "award"] = "{0}-{1}-{2}-{3}-{4}".f(place, c.q, wcat, sum, i);
+            setClause[clause + "award"] = "{0}-{1}-{2}-{3}-{4}".f(place, comp.q, wcat, player.sum, i);
           }
 
           if (gold)

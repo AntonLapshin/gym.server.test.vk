@@ -5,6 +5,13 @@ var _db = null,
   _collections = {},
   _references = {};
 
+String.prototype.f = function() {
+  var args = arguments;
+  return this.replace(/{(\d+)}/g, function(match, number) {
+    return typeof args[number] != 'undefined' ? args[number] : match;
+  });
+};
+
 $.handle = function(err, data, defer) {
   if (err)
     defer.reject(err);
