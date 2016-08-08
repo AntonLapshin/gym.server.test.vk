@@ -29,12 +29,22 @@ module.exports = {
       var player = session.player;
       var id = params.id;
 
-      if (player.public.comp && player.public.comp[id] && player.public.comp[id].status == 'started') {
+      var wcat = Rank.getCatIndex(player.public.mass || 45);
+      var comp = $.getComp(wcat).comps[id];
+      var uid = comp.uid;
+
+      if (player.public.comp &&
+        player.public.comp[id] &&
+        player.public.comp[id].status == 'started' &&
+        player.public.comp[id].uid == uid) {
         defer.reject('COMPPOWER_ALREADY_STARTED');
         return defer;
       }
 
-      if (player.public.comp && player.public.comp[id] && player.public.comp[id].status == 'finished') {
+      if (player.public.comp &&
+        player.public.comp[id] &&
+        player.public.comp[id].status == 'finished' &&
+        player.public.comp[id].uid == uid) {
         defer.reject('COMPPOWER_FINISHED');
         return defer;
       }
@@ -43,6 +53,7 @@ module.exports = {
         player.public.comp = {};
 
       player.public.comp[id] = {
+        uid: uid,
         status: 'started',
         index: 0,
         attempts: []

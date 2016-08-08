@@ -120,6 +120,10 @@ module.exports = {
     }
   },
 
+  getCatId: function(cat) {
+    return WCATS.indexOf(cat);
+  },
+
   getRank: function(player) {
     var wcPlayer = getCat(player.public.mass);
     var wcIndex = WCATS.indexOf(wcPlayer);

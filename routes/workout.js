@@ -257,7 +257,7 @@ module.exports = {
       }
 
       player.private.energy -= energyFact;
-      setFrazzle(player, exRef, effect);
+      setFrazzle(player, exRef, effect, energyFact);
       session.isDirty = true;
 
       defer.resolve(answer);
@@ -267,13 +267,16 @@ module.exports = {
   }
 };
 
-function setFrazzle(player, exRef, effect) {
+function setFrazzle(player, exRef, effect, energyFact) {
   var frazzle = player.private.frazzle;
   var stress = player.private.stress;
   var tonus = player.private.tonus;
+
+  var feffect = energyFact / exRef.energy * 0.2;
+
   exRef.body.forEach(function(muscleExercise, i) {
 
-    var f = frazzle[muscleExercise._id] + muscleExercise.stress * effect;
+    var f = frazzle[muscleExercise._id] + muscleExercise.stress * feffect;
     if (f > 1) f = 1;
     var s = stress[muscleExercise._id] + (muscleExercise.stress < 0.5 ? muscleExercise.stress / 5 : muscleExercise.stress) * effect;
     if (s > 1) s = 1;

@@ -1,6 +1,54 @@
 var Db = require('../db');
 var $ = require('jquery-deferred');
 var Curve = require('../controllers/curve');
+var Rank = require('../controllers/rank');
+
+var WCATK = [{
+  id: 0,
+  gold: 70, // 1 gold for each 70 members
+  money: 1, // 1 dollar for each member
+  round: Math.floor
+}, {
+  id: 1,
+  gold: 50,
+  money: 1.2,
+  round: Math.floor
+}, {
+  id: 2,
+  gold: 35,
+  money: 1.5,
+  round: Math.floor
+}, {
+  id: 3,
+  gold: 25,
+  money: 1.8,
+  round: Math.ceil
+}, {
+  id: 4,
+  gold: 20,
+  money: 2,
+  round: Math.ceil
+}, {
+  id: 5,
+  gold: 15,
+  money: 2.3,
+  round: Math.ceil
+}, {
+  id: 6,
+  gold: 10,
+  money: 2.6,
+  round: Math.ceil
+}, {
+  id: 7,
+  gold: 7,
+  money: 3,
+  round: Math.ceil
+}, {
+  id: 8,
+  gold: 5,
+  money: 3.5,
+  round: Math.ceil
+}];
 
 var FUND_LEVELS = [{
   id: 0,
@@ -42,8 +90,9 @@ var FUND_LEVELS = [{
 
 function getCompDetails(id, wcat, members) {
 
-  var money = members;
-  var gold = Math.ceil(members / 20);
+  var wcatk = WCATK[Rank.getCatId(wcat)];
+  var money = wcatk.round(members * wcatk.money);
+  var gold = wcatk.round(members / wcat.gold);
 
   var level = $.grep(FUND_LEVELS, function(v) {
     return v.members > members;
@@ -69,7 +118,7 @@ function makeCompActive(wcat, id) {
   updateClause[clause + 'members'] = [];
   updateClause[clause + 'last'] = now;
 
-  var comp = getComp(wcat).comps[id];
+  var comp = $.getComp(wcat).comps[id];
   comp.uid = now;
   //comp.res = [];
   comp.status = 1;
@@ -82,7 +131,7 @@ function makeCompActive(wcat, id) {
   });
 }
 
-function getComp(wcat) {
+$.getComp = function(wcat) {
   return $.grep(GLOBAL.GYM.COMPS, function(v) {
     return v._id == wcat;
   })[0];
@@ -103,7 +152,7 @@ module.exports = {
     console.log('************* Comp Job is running ************');
     for (var wcat = 0; wcat < GLOBAL.GYM.COMPS.length; wcat++) {
 
-      var comps = getComp(wcat).comps;
+      var comps = $.getComp(wcat).comps;
       for (var i = 0; i < comps.length; i++) {
         var comp = comps[i];
 
@@ -121,7 +170,8 @@ module.exports = {
           continue;
         }
 
-        if (comp.q < 1)
+        // Minimum members
+        if (comp.q < GLOBAL.GYM.COMP_MIN_Q)
           continue;
 
         //
@@ -185,7 +235,7 @@ module.exports = {
         updateClause["comps." + i + ".resQ"] = players.length;
         updateClause["comps." + i + ".status"] = 0;
 
-        getComp(wcat).comps[0].status = 0;
+        $.getComp(wcat).comps[0].status = 0;
         Db.update('comp', wcat, {
           "$set": updateClause
         });
