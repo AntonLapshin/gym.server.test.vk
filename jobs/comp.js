@@ -90,7 +90,9 @@ var FUND_LEVELS = [{
 
 function getCompDetails(id, wcat, members) {
 
-  var wcatk = WCATK[Rank.getCatId(wcat)];
+  if (wcat > 10)
+    wcat = Rank.getCatId(wcat);
+  var wcatk = WCATK[wcat];
   var money = wcatk.round(members * wcatk.money);
   var gold = wcatk.round(members / wcat.gold);
 
