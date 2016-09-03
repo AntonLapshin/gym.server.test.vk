@@ -237,7 +237,7 @@ module.exports = {
         updateClause["comps." + i + ".resQ"] = players.length;
         updateClause["comps." + i + ".status"] = 0;
 
-        $.getComp(wcat).comps[0].status = 0;
+        comp.status = 0;
         Db.update('comp', wcat, {
           "$set": updateClause
         });

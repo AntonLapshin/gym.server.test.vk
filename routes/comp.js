@@ -211,9 +211,10 @@ module.exports = {
             "mass": player.public.mass || 45
           };
 
-          GLOBAL.GYM.COMPS[wcat].comps[0].members.push(p);
-          GLOBAL.GYM.COMPS[wcat].comps[0].last = now;
-          GLOBAL.GYM.COMPS[wcat].comps[0].q++;
+          var comps = $.getComp(wcat).comps;
+          comps[0].members.push(p);
+          comps[0].last = now;
+          comps[0].q++;
 
           Db.update('comp', wcat, {
             "$push": {
