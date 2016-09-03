@@ -9,12 +9,12 @@ module.exports = {
       }
     },
     handler: function(session, params) {
-      // Db.insert('errors', {
-      //   _id: (new Date()).getTime(),
-      //   playerId: session.player._id,
-      //   side: 'client',
-      //   message: params.message
-      // });
+      Db.insert('errors', {
+        _id: (new Date()).getTime(),
+        playerId: session.player._id,
+        side: 'client',
+        message: params.message
+      });
 
       var defer = $.Deferred();
 
