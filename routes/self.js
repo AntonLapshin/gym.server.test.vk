@@ -7,6 +7,7 @@ var Curve = require('../controllers/curve');
 var Rank = require('../controllers/rank');
 var Stimul = require('../controllers/stimul');
 var Mass = require('../controllers/mass');
+var Err = require('./error');
 
 var MAX_LEVEL = 67;
 var GARB_MAX = 14;
@@ -282,7 +283,8 @@ function update(player) {
     regen.energy = 0.3;
 
   var now = new Date();
-  var interval = DateHelper.intervalHours(Date.parse(now) - Date.parse(new Date(player.private.reg.lastUpdateTime)));
+  var interval = (new Date() - player.private.reg.lastUpdateTime) * 1000 * 60 * 60;
+  //var interval = DateHelper.intervalHours(Date.parse(now) - Date.parse(new Date(player.private.reg.lastUpdateTime)));
   var frazzleDecrease = $.round(regen.frazzle * interval);
   var tonusDecrease = $.round(regen.tonus * interval);
   var energyValue = $.round(player.private.energy + regen.energy * interval);
@@ -302,18 +304,33 @@ function update(player) {
   // PlayersCollection.initFrazzle(player);
   // PlayersCollection.initTonus(player);
 
+  var frazzle = player.private.frazzle;
+  var tonus = player.private.tonus;
+
   for (var i = 0; i <= 15; i++) {
-    var f = player.private.frazzle[i];
+    var f = frazzle[i];
     f = $.round(f - frazzleDecrease);
     if (f < 0)
       f = 0;
-    player.private.frazzle[i] = f;
+    frazzle[i] = f;
 
-    var t = player.private.tonus[i];
+    var t = tonus[i];
     t = $.round(t - tonusDecrease);
     if (t < 0)
       t = 0;
-    player.private.tonus[i] = t;
+
+    if (t == 0 && tonus[i] > 0){
+      if (tonus[i] - t > (regen.tonus * interval) * 1.2){
+        var message = 
+          'tonus[' + i + '] = ' + tonus[i] + '; ' +
+          'interval = ' + interval + '; ' +
+          'tonusDecrease = ' + tonusDecrease + '; ';
+        Err.default.handler({ player: player }, { message: message });        
+        t = tonus[i];
+      }
+    }
+
+    tonus[i] = t;
   }
 }
 
