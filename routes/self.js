@@ -320,14 +320,14 @@ function update(player) {
       t = 0;
 
     if (t == 0 && tonus[i] > 0){
-      if (tonus[i] - t > (regen.tonus * interval) * 1.2){
+      // if (tonus[i] - t > (regen.tonus * interval) * 1.2){
         var message = 
           'tonus[' + i + '] = ' + tonus[i] + '; ' +
           'interval = ' + interval + '; ' +
           'tonusDecrease = ' + tonusDecrease + '; ';
         Err.default.handler({ player: player }, { message: message });        
         t = tonus[i];
-      }
+      // }
     }
 
     tonus[i] = t;
