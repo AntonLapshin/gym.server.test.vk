@@ -283,7 +283,7 @@ function update(player) {
     regen.energy = 0.3;
 
   var now = new Date();
-  var interval = (new Date() - player.private.reg.lastUpdateTime) * 1000 * 60 * 60;
+  var interval = (new Date() - player.private.reg.lastUpdateTime) / ( 1000 * 60 * 60 );
   //var interval = DateHelper.intervalHours(Date.parse(now) - Date.parse(new Date(player.private.reg.lastUpdateTime)));
   var frazzleDecrease = $.round(regen.frazzle * interval);
   var tonusDecrease = $.round(regen.tonus * interval);
