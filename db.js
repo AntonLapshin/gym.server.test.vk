@@ -240,12 +240,7 @@ function getAllValues(coll) {
     coll = _collections[coll];
 
   return $.Deferred(function(defer) {
-    coll.find({
-      $query: {},
-      $orderby: {
-        _id: 1
-      }
-    }).toArray(function(err, data) {
+    coll.find({}).toArray(function(err, data) {
       $.handle(err, data, defer);
     });
   });

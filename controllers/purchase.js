@@ -16,7 +16,7 @@ module.exports = {
       player.public.exercises.push({
         _id: id
       });
-    } else if (type === 'hs' || type === 'bd' || type === 'gl' || type === 'sh' || type === 'ts' || type === 'sn') {
+    } else if (type === 'hs' || type === 'bd' || type === 'gl' || type === 'sh' || type === 'ts' || type === 'sn' || type === 'tt') {
       add(player, type, id);
     } else if (type === 'money' || type === 'gold') {
       var diff = Math.floor(real * _rates[type] + real * _bonus * (real * _rates[type]));
