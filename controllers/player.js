@@ -40,18 +40,16 @@ module.exports = {
     var catData = Rank.getCatData(cat);
     return $.Deferred(function(defer) {
       Db.getColl('players').find({
-          $query: {
-            "public.mass": {
-              "$gte": catData.min,
-              "$lt": catData.max
-            }
-          },
-          $orderby: {
-            'public.sum': -1
+          "public.mass": {
+            "$gte": catData.min,
+            "$lt": catData.max
           }
         }, {
           _id: 1,
           public: 1
+        })
+        .sort({
+          'public.sum': -1
         })
         .limit(LIMIT_TOP_PLAYERS)
         .toArray(function(err, data) {
